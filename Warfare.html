@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedules & Fellowship | Breaking Chain Ministry</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png?v=4">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=4">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=4">
+    <link rel="shortcut icon" href="favicon-48.png?v=4">
+    <meta name="theme-color" content="#06080c">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Base Themes & Dynamic Background Setup */
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            color: #e2e8f0; 
+            margin: 0; 
+            padding: 0; 
+            text-align: center; 
+            line-height: 1.7;
+            overflow-x: hidden;
+            background-color: #06080c;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* --- FIXED & LOCKED: HIGH-IMPACT CYBER-CINEMATIC TANTRA BACKGROUND WRAPPER --- */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Gipulihan na og tantra.jpg nga naay versioning para dili ma-lock sa browser cache */
+            background: linear-gradient(
+                rgba(6, 8, 12, 0.45) 0%, 
+                rgba(6, 8, 12, 0.60) 50%, 
+                rgba(6, 8, 12, 0.85) 100%
+            ), url('tantra.jpg') no-repeat center center;
+            background-size: cover;
+            /* Blending filter nodes para mogawas ang premium 3D lines ug celestial elements */
+            filter: contrast(1.22) brightness(0.92) saturate(1.15);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* --- GLOBAL BACKGROUND ANINIPOT --- */
+        .aninipot-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* --- ADVANCED MULTI-COLOR NEON ANINIPOT EFFECT --- */
+        .aninipot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: lutaw 8s infinite ease-in-out, rainbowNeon 4s infinite linear;
+            opacity: 0;
+        }
+
+        .aninipot:nth-child(1) { left: 15%; top: 85%; animation-delay: 0s; width: 5px; height: 5px; }
+        .aninipot:nth-child(2) { left: 40%; top: 65%; animation-delay: 1.8s; width: 7px; height: 7px; }
+        .aninipot:nth-child(3) { left: 60%; top: 75%; animation-delay: 3.5s; width: 4px; height: 4px; }
+        .aninipot:nth-child(4) { left: 80%; top: 55%; animation-delay: 5s; width: 8px; height: 8px; }
+        .aninipot:nth-child(5) { left: 90%; top: 80%; animation-delay: 2.5s; width: 6px; height: 6px; }
+
+        @keyframes lutaw {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            30% { opacity: 0.8; }
+            70% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
+        }
+
+        @keyframes rainbowNeon {
+            0% { background: #00d2ff; box-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
+            16% { background: #39ff14; box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14; }
+            33% { background: #9d00ff; box-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff; }
+            50% { background: #ff007f; box-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; }
+            66% { background: #ff0000; box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+            83% { background: #ffaa00; box-shadow: 0 0 10px #ffaa00, 0 0 20px #ffaa00; }
+            100% { background: #ffffff; box-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff; }
+        }
+
+        /* --- INSIDE BOX ANINIPOT EFFECT --- */
+        .box-aninipot-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 5;
+        }
+        .box-particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            animation: boxLutaw 6s infinite ease-in-out, rainbowNeon 5s infinite linear;
+            opacity: 0;
+        }
+        .box-particle:nth-child(1) { left: 15%; animation-delay: 0s; }
+        .box-particle:nth-child(2) { left: 50%; animation-delay: 2s; }
+        .box-particle:nth-child(3) { left: 85%; animation-delay: 4s; }
+
+        @keyframes boxLutaw {
+            0% { transform: translateY(110%) translateX(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-10%) translateX(20px); opacity: 0; }
+        }
+
+        /* --- CLEAN HIGH-IMPACT GAMING RIPPLE EFFECT --- */
+        .gaming-ripple-effect {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: transparent;
+            border: 3px solid #ff4d4d;
+            box-shadow: 0 0 15px #ff4d4d, inset 0 0 15px #ff4d4d;
+            pointer-events: none;
+            z-index: 2000;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .gaming-ripple-effect.active {
+            animation: burstRipple 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes burstRipple {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.9;
+                border-color: #ff4d4d;
+                box-shadow: 0 0 10px #ff4d4d, inset 0 0 5px #ff4d4d;
+            }
+            50% {
+                border-color: #d4af37;
+                box-shadow: 0 0 25px #d4af37, inset 0 0 10px #d4af37;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(10);
+                opacity: 0;
+                border-color: #00d2ff;
+                box-shadow: 0 0 40px rgba(0, 210, 255, 0), inset 0 0 20px rgba(0, 210, 255, 0);
+            }
+        }
+
+        /* --- UPDATED NAVIGATION INTERFACE: SOLID GAMING STYLE WITH FLARE SHIMMER --- */
+        nav { 
+            background: rgba(6, 8, 12, 0.92); 
+            padding: 16px 20px; 
+            border-bottom: 3px solid #ff4d4d; 
+            box-shadow: 0 4px 25px rgba(255, 77, 77, 0.45);
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 14px;
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+        nav a { 
+            color: #d4af37; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900; 
+            font-size: 15px; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-radius: 6px;
+            background: #0d111a; /* Solid dark contrast backing layer */
+            border: 2px solid rgba(212, 175, 55, 0.45);
+            position: relative;
+            overflow: hidden; /* Truncates external laser flares */
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+
+        /* High-Impact White Flare Light Shimmer Engine */
+        nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 80px; 
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.9) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-35deg); 
+            animation: lightGlint 3s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes lightGlint {
+            0% { left: -150%; }
+            35% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            background: #141b29;
+            border-color: #ff4d4d;
+            text-shadow: 0 0 10px #ff4d4d, 0 0 20px #ff4d4d;
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.6);
+            transform: translateY(-3px);
+        }
+
+        nav a:hover::before {
+            animation: lightGlint 1s infinite linear;
+        }
+
+        /* Layout wrapper */
+        .content { 
+            padding: 20px 20px 40px 20px; 
+            max-width: 900px; 
+            margin: auto; 
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Clean Logo Area */
+        .logo-container {
+            margin: 20px auto 10px auto;
+            max-width: 160px;
+            width: 100%;
+        }
+        .main-logo {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.3));
+            transition: transform 0.4s ease, filter 0.4s ease;
+        }
+        .main-logo:hover {
+            transform: scale(1.06);
+            filter: drop-shadow(0 0 25px rgba(255, 77, 77, 0.6));
+        }
+
+        /* --- MODERN GAMING SLIDESHOW FRAME --- */
+        .slideshow-frame {
+            position: relative;
+            margin: 30px auto;
+            width: 100%;
+            max-width: 850px;
+            height: 480px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+            animation: powerAura 4s infinite ease-in-out;
+            transition: all 0.4s ease;
+            background-color: #0d1017;
+        }
+        
+        @media (max-width: 768px) { .slideshow-frame { height: 350px; } }
+        @media (max-width: 480px) { .slideshow-frame { height: 240px; } }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            z-index: 1;
+        }
+        .slide.active { opacity: 1; z-index: 2; }
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.9) contrast(1.05);
+        }
+
+        @keyframes powerAura {
+            0% { border-color: rgba(212, 175, 55, 0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(212, 175, 55, 0.2); }
+            50% { border-color: rgba(255, 77, 77, 0.6); box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 25px rgba(255, 77, 77, 0.4); }
+            100% { border-color: rgba(212, 175, 55, 0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(212, 175, 55, 0.2); }
+        }
+
+        .slideshow-frame::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(255, 77, 77, 0.05) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .slide-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(13, 16, 23, 0.7);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 12px 16px;
+            cursor: pointer;
+            z-index: 4;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(3px);
+        }
+        .slide-btn:hover {
+            background: #ff4d4d;
+            color: #fff;
+            border-color: #ff4d4d;
+            box-shadow: 0 0 15px #ff4d4d;
+        }
+        .prev-btn { left: 15px; }
+        .next-btn { right: 15px; }
+
+        /* --- GAMING RGB GRADIENT ANIMATION FOR H1 --- */
+        @keyframes gamingRGB {
+            0% { color: #ff3333; filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.6)); }
+            20% { color: #33ff33; filter: drop-shadow(0 0 8px rgba(51, 255, 51, 0.6)); }
+            40% { color: #3333ff; filter: drop-shadow(0 0 8px rgba(51, 51, 255, 0.6)); }
+            60% { color: #cc33ff; filter: drop-shadow(0 0 8px rgba(204, 51, 255, 0.6)); }
+            80% { color: #ffff33; filter: drop-shadow(0 0 8px rgba(255, 255, 51, 0.6)); }
+            100% { color: #ff3333; filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.6)); }
+        }
+
+        h1 { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(26px, 5vw, 44px); 
+            text-transform: uppercase; 
+            margin: 15px 0 20px 0;
+            letter-spacing: 2px;
+            font-weight: 900;
+            animation: gamingRGB 6s infinite linear;
+        }
+
+        h2 { 
+            font-family: 'Orbitron', sans-serif;
+            color: #ff4d4d; 
+            margin-top: 40px; 
+            font-size: clamp(20px, 4vw, 28px); 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(255, 77, 77, 0.3); 
+            padding-bottom: 10px; 
+            text-shadow: 0 0 15px rgba(255, 77, 77, 0.6);
+        }
+
+        p { 
+            font-size: clamp(16px, 3.5vw, 19px); 
+            color: #e2e8f0;
+            margin-bottom: 30px; 
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.95);
+        }
+        
+        /* Gaming Card Style */
+        .schedule-item { 
+            text-align: left; 
+            background: rgba(11, 15, 23, 0.88); /* Mas gipakapalan para dili molubog sa likod */
+            padding: 25px;
+            border: 1px solid rgba(212, 175, 55, 0.22);
+            border-left: 5px solid #d4af37;
+            border-radius: 8px;
+            margin: 20px 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+        }
+        .schedule-item:hover {
+            transform: translateX(8px);
+            background: rgba(20, 26, 38, 0.95);
+            border-left-color: #ff4d4d;
+            border-color: rgba(255, 77, 77, 0.4);
+            box-shadow: 0 0 25px rgba(255, 77, 77, 0.3);
+        }
+        .schedule-item strong { 
+            color: #d4af37; 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            display: block;
+            margin-bottom: 8px;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+        }
+        .schedule-item em {
+            display: block;
+            margin-top: 8px;
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        /* Contact Panel */
+        .contact { 
+            background: rgba(26, 0, 0, 0.85); 
+            padding: 30px; 
+            margin-top: 50px; 
+            font-size: 18px; 
+            border: 2px solid #ff4d4d;
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(255, 77, 77, 0.3);
+            backdrop-filter: blur(4px);
+            position: relative;
+        }
+        .contact h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #ff4d4d;
+            margin-top: 0;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px #ff4d4d;
+            text-transform: uppercase;
+        }
+
+        /* Mobile Viewport Grid System */
+        @media (max-width: 480px) {
+            nav { padding: 14px 8px; gap: 10px; }
+            nav a { font-size: 13px; padding: 12px 14px; border-radius: 6px; width: 45%; box-sizing: border-box; }
+            .content { padding: 15px 12px; }
+            .logo-container { max-width: 120px; }
+            .slide-btn { padding: 8px 10px; font-size: 12px; }
+        }
+    
+        /* ===== COMPACT RESPONSIVE NAV (phone / tablet / desktop) ===== */
+        nav { padding: 8px 10px !important; gap: 8px !important; flex-wrap: nowrap !important; justify-content: center !important; }
+        nav a { flex: 0 1 auto !important; width: auto !important; min-width: 0; box-sizing: border-box !important; flex-direction: row; gap: 6px;
+                font-size: 12px !important; letter-spacing: 1px !important; padding: 8px 14px !important; border-width: 1.5px !important;
+                border-radius: 7px !important; white-space: nowrap; line-height: 1.1; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+        nav a:hover { transform: none !important; }
+        nav a .ni { font-size: 1.15em; line-height: 1; }
+        @media (min-width: 1025px) { nav a { font-size: 13px !important; padding: 9px 20px !important; } nav { gap: 12px !important; } }
+        @media (max-width: 599px) {
+            nav { padding: 6px 5px !important; gap: 4px !important; }
+            nav a { flex: 1 1 0 !important; flex-direction: column; gap: 3px; font-size: 9px !important; letter-spacing: .3px !important;
+                    padding: 6px 2px !important; border-radius: 6px !important; }
+            nav a .ni { font-size: 17px; }
+            nav a::before { display: none; }
+            nav.nav6 { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 5px !important; }
+            nav.nav6 a { flex-direction: row; gap: 5px; font-size: 9.5px !important; padding: 7px 3px !important; }
+            nav.nav6 a .ni { font-size: 14px; }
+        }
+        @media (max-width: 359px) { nav a { font-size: 8px !important; letter-spacing: 0 !important; } }
+    </style>
+</head>
+<body id="main-body">
+
+    <div id="gaming-effect" class="gaming-ripple-effect"></div>
+
+    <div class="bg-overlay"></div>
+    <div class="aninipot-container">
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+    </div>
+
+    <nav>
+        <a href="index.html"><span class="ni">🏠</span><span class="nt">Home</span></a>
+        <a href="Warfare.html" style="color:#fff; border-color: #ff4d4d; box-shadow: 0 0 12px #ff4d4d;"><span class="ni">📅</span><span class="nt">Schedules</span></a>
+        <a href="Bible.html"><span class="ni">📖</span><span class="nt">Bible</span></a>
+        <a href="Journal.html"><span class="ni">📝</span><span class="nt">Journal</span></a>
+        <a href="Prayer.html"><span class="ni">🙏</span><span class="nt">Prayer</span></a>
+    </nav>
+
+    <div class="content">
+        
+        <div class="logo-container">
+            <img src="bcm.png" alt="Breaking Chain Ministry Logo" class="main-logo">
+        </div>
+
+        <h1>WELCOME TO OUR FELLOWSHIP</h1>
+        <p>We invite you to step into a place of power, prayer, and spiritual refreshing. At Breaking Chain Ministry, we believe that when we gather together, we align ourselves with the heartbeat of God.</p>
+
+        <div class="slideshow-frame">
+            <div class="box-aninipot-container">
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+            </div>
+            
+            <button class="slide-btn prev-btn" onclick="changeSlide(-1)">◀</button>
+            <button class="slide-btn next-btn" onclick="changeSlide(1)">▶</button>
+
+            <div class="slide active"><img src="people.jpg" alt="Fellowship 1"></div>
+            <div class="slide"><img src="picture 1.jfif" alt="Fellowship 2"></div>
+            <div class="slide"><img src="Picture 2.jfif" alt="Fellowship 3"></div>
+            <div class="slide"><img src="Picture 3.jfif" alt="Fellowship 4"></div>
+            <div class="slide"><img src="picture 4.jfif" alt="Fellowship 5"></div>
+            <div class="slide"><img src="picture 5.jfif" alt="Fellowship 6"></div>
+            <div class="slide"><img src="picture 6.jfif" alt="Fellowship 7"></div>
+            <div class="slide"><img src="picture 7.jpg" alt="Fellowship 8"></div>
+            <div class="slide"><img src="picture 8.jfif" alt="Fellowship 9"></div>
+        </div>
+
+        <h2>WEEKLY GATHERINGS & FELLOWSHIP</h2>
+        
+        <div class="schedule-item">
+            <div class="box-aninipot-container">
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+            </div>
+            <strong>Sunday Worship Service</strong>
+            Time: 5:00 PM<br>
+            <em>Purpose: Our corporate gathering where we consolidate our strength and break atmospheres of oppression.</em>
+        </div>
+
+        <div class="schedule-item">
+            <div class="box-aninipot-container">
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+            </div>
+            <strong>Midweek Prayer Meeting</strong>
+            Time: Every Wednesday at 7:00 PM to 8:00 PM<br>
+            <em>Purpose: A dedicated time for intercession to dismantle strongholds and break chains of oppression.</em>
+        </div>
+
+        <div class="schedule-item">
+            <div class="box-aninipot-container">
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+            </div>
+            <strong>Soaking Sessions</strong>
+            Time: Every Second Saturday of the Month | 7:00 PM to 8:00 PM<br>
+            <em>Purpose: A sacred time to recharge your spiritual stamina and soak in the presence of the Holy Spirit.</em>
+        </div>
+
+        <div class="contact">
+            <div class="box-aninipot-container">
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+            </div>
+            <h3>JOIN US IN THE BATTLE</h3>
+            <p><strong>Phone:</strong> 0991 359 1024<br>
+            <strong>Location:</strong> RDM, Tipolo, Sacris Road Extension, Mandaue City</p>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // --- Slideshow Logic ---
+        let currentSlideIdx = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let slideInterval = setInterval(autoNextSlide, 4000);
+
+        function updateSlideDisplay() {
+            slides.forEach((slide, idx) => {
+                if (idx === currentSlideIdx) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+        }
+
+        function autoNextSlide() {
+            currentSlideIdx = (currentSlideIdx + 1) % totalSlides;
+            updateSlideDisplay();
+        }
+
+        function changeSlide(direction) {
+            clearInterval(slideInterval);
+            currentSlideIdx = (currentSlideIdx + direction + totalSlides) % totalSlides;
+            updateSlideDisplay();
+            slideInterval = setInterval(autoNextSlide, 5000);
+        }
+
+        // --- JavaScript Engine to execute High-Impact Gaming Ripple FX ---
+        const bodyElement = document.getElementById('main-body');
+        const gamingEffectElement = document.getElementById('gaming-effect');
+
+        function triggerGamingRipple(e) {
+            let clickX, clickY;
+            if (e.type === 'touchstart') {
+                clickX = e.touches[0].clientX;
+                clickY = e.touches[0].clientY;
+            } else {
+                clickX = e.clientX;
+                clickY = e.clientY;
+            }
+
+            gamingEffectElement.style.left = clickX + 'px';
+            gamingEffectElement.style.top = clickY + 'px';
+
+            gamingEffectElement.classList.remove('active');
+            void gamingEffectElement.offsetWidth; // Force Reflow
+            gamingEffectElement.classList.add('active');
+        }
+
+        bodyElement.addEventListener('click', triggerGamingRipple);
+        bodyElement.addEventListener('touchstart', triggerGamingRipple, {passive: true});
+    </script>
+
+    <script src="bcm-fx.js" defer></script>
+</body>
+</html>

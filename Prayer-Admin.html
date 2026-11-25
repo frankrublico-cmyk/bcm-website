@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ceb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Prayer Requests · Admin · BCM</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png?v=4">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=4">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=4">
+    <link rel="shortcut icon" href="favicon-48.png?v=4">
+    <meta name="theme-color" content="#06080c">
+    <link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Outfit',sans-serif;color:#e2e8f0;background:#06080c;min-height:100vh}
+.bg{position:fixed;inset:0;background:linear-gradient(rgba(6,8,12,.82),rgba(6,8,12,.94)),url('tantra.jpg') center/cover no-repeat;z-index:-1}
+header{display:flex;align-items:center;gap:14px;padding:14px 20px;background:rgba(6,8,12,.95);border-bottom:3px solid #ff4d4d;position:sticky;top:0;z-index:10;flex-wrap:wrap}
+header img{height:46px}
+header h1{margin:0;font-family:Orbitron,sans-serif;font-size:clamp(15px,3.4vw,22px);color:#d4af37;letter-spacing:1px;flex:1}
+.btn{background:linear-gradient(135deg,#d4af37,#b8901c);color:#000;border:0;border-radius:10px;padding:10px 18px;font-weight:800;cursor:pointer;font-size:14px;text-decoration:none;display:inline-block}
+.btn{margin:4px 6px 0 0}.btn.alt{background:#1e293b;color:#fff;border:1px solid #334155}.btn.red{background:#b00020;color:#fff}.btn:disabled{opacity:.5}
+#login{max-width:380px;margin:12vh auto;background:rgba(11,15,23,.95);border:1px solid rgba(212,175,55,.4);border-radius:16px;padding:26px;text-align:center}
+#login h2{font-family:Orbitron,sans-serif;color:#d4af37;margin:0 0 14px;font-size:18px}
+input[type=password],input[type=text],textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #475569;background:#0d111a;color:#fff;font-size:16px;font-family:inherit;margin:6px 0}
+.err{color:#ff6b6b;font-size:14px;min-height:20px;margin-top:6px}
+#app{display:none;max-width:1150px;margin:0 auto;padding:18px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.stat{flex:1;min-width:110px;background:rgba(11,15,23,.92);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px}
+.stat b{display:block;font-family:Orbitron,sans-serif;font-size:26px;color:#fff}
+.stat span{font-size:12px;color:#a0aec0;text-transform:uppercase;letter-spacing:1px}
+.stat.new b{color:#ff4d4d}.stat.done b{color:#39ff14}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.bar input{flex:1;min-width:160px;margin:0}
+.tab{background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:20px;padding:8px 16px;cursor:pointer;font-size:14px}
+.tab.on{background:#d4af37;color:#000;border-color:#d4af37;font-weight:700}
+.grid{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:16px;align-items:start}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.grid.open #list{display:none}.grid:not(.open) #pane{display:none}}
+#list,#pane{background:rgba(11,15,23,.93);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px}
+#list{max-height:70vh;overflow:auto}
+.row{padding:12px;border-radius:10px;border:1px solid transparent;cursor:pointer;margin-bottom:4px}
+.row:hover{background:rgba(255,255,255,.05)}.row.sel{border-color:#d4af37;background:rgba(212,175,55,.08)}
+.row b{color:#fff;display:flex;align-items:center;gap:8px}.row p{margin:3px 0 0;color:#a0aec0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row small{color:#64748b;font-size:11px}
+.dot{width:9px;height:9px;border-radius:50%;background:#ff4d4d;display:inline-block;box-shadow:0 0 8px #ff4d4d}.dot.ok{background:#39ff14;box-shadow:0 0 8px #39ff14}
+#pane{min-height:300px;padding:16px}
+#pane h2{margin:0 0 10px;font-family:Orbitron,sans-serif;font-size:18px;color:#d4af37;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.msgs{display:flex;flex-direction:column;gap:10px;max-height:46vh;overflow:auto;margin-bottom:10px}
+.m{max-width:86%;padding:10px 14px;border-radius:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.m small{display:block;opacity:.6;font-size:11px;margin-top:4px}
+.m.v{align-self:flex-start;background:#2a2f3d;border:1px solid #d4af37}
+.m.a{align-self:flex-end;background:#0b5cff;color:#fff}
+.empty{color:#a0aec0;text-align:center;padding:30px}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<header>
+  <img src="bcm.png" alt="BCM">
+  <h1>🙏 PRAYER REQUESTS · ADMIN</h1>
+  <a class="btn alt" href="Prayer.html">◀ Prayer page</a>
+  <button class="btn alt" id="out" style="display:none">Logout</button>
+</header>
+
+<div id="login">
+  <h2>🔒 ADMIN LOGIN</h2>
+  <input type="password" id="pw" placeholder="Password" autocomplete="current-password">
+  <button class="btn" id="go" style="margin-top:8px;width:100%">ENTER</button>
+  <div class="err" id="lerr"></div>
+</div>
+
+<div id="app">
+  <div class="stats">
+    <div class="stat"><b id="sAll">0</b><span>Tanan</span></div>
+    <div class="stat new"><b id="sNew">0</b><span>Bag-o (wala pa nasagot)</span></div>
+    <div class="stat done"><b id="sDone">0</b><span>Nasagot na</span></div>
+  </div>
+  <div class="bar">
+    <input type="text" id="q" placeholder="Pangitaa ang pangalan o request...">
+    <button class="tab on" data-f="all">Tanan</button>
+    <button class="tab" data-f="new">Bag-o</button>
+    <button class="tab" data-f="done">Nasagot</button>
+    <button class="btn alt" id="rf">↻ Refresh</button>
+  </div>
+  <div class="grid" id="grid">
+    <div id="list"></div>
+    <div id="pane"><div class="empty">Pili ug usa ka request sa lista.</div></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var API = '/api/chat', pw = '', threads = [], cur = null, filter = 'all', timer = null;
+  var $ = function (id) { return document.getElementById(id); };
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  function api(b) {
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) })
+      .catch(function () { throw new Error(location.protocol === 'file:' ? 'Mo-work ra ni inig na-deploy sa Netlify (dili sa file sa kompyuter).' : 'Dili maabot ang server.'); })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); });
+  }
+  function fmt(iso) { try { return new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; } }
+  function isNew(t) { var l = t.msgs[t.msgs.length - 1]; return l && l.r === 'v'; }
+
+  function login(p, silent) {
+    return api({ action: 'list', password: p }).then(function (d) {
+      pw = p; try { sessionStorage.setItem('bcm_chat_admin', p); } catch (e) {}
+      $('login').style.display = 'none'; $('app').style.display = 'block'; $('out').style.display = '';
+      threads = d.threads; render();
+      clearInterval(timer); timer = setInterval(function () { if (!document.hidden) load(); }, 30000);
+    }).catch(function (e) { if (!silent) $('lerr').textContent = e.message; try { sessionStorage.removeItem('bcm_chat_admin'); } catch (x) {} });
+  }
+  function load() {
+    return api({ action: 'list', password: pw }).then(function (d) { threads = d.threads; render(); }).catch(function (e) { console.warn(e.message); });
+  }
+
+  function render() {
+    var n = threads.filter(isNew).length;
+    $('sAll').textContent = threads.length; $('sNew').textContent = n; $('sDone').textContent = threads.length - n;
+    var q = $('q').value.trim().toLowerCase(), list = $('list'); list.textContent = '';
+    var shown = threads.filter(function (t) {
+      if (filter === 'new' && !isNew(t)) return false;
+      if (filter === 'done' && isNew(t)) return false;
+      if (!q) return true;
+      return (t.name || '').toLowerCase().indexOf(q) > -1 || t.msgs.some(function (m) { return m.t.toLowerCase().indexOf(q) > -1; });
+    });
+    if (!shown.length) list.appendChild(el('div', 'empty', threads.length ? 'Walay nakit-an.' : 'Wala pay prayer requests.'));
+    shown.forEach(function (t) {
+      var r = el('div', 'row' + (cur && cur.token === t.token ? ' sel' : ''));
+      var b = el('b'); var d = el('span', 'dot' + (isNew(t) ? '' : ' ok')); b.appendChild(d); b.appendChild(document.createTextNode(t.name || 'Bisita')); r.appendChild(b);
+      var last = t.msgs[t.msgs.length - 1] || {};
+      r.appendChild(el('p', '', (last.r === 'a' ? 'Ikaw: ' : '') + (last.t || '')));
+      r.appendChild(el('small', '', fmt(t.updated) + ' · ' + t.msgs.length + ' ka mensahe'));
+      r.onclick = function () { cur = t; $('grid').classList.add('open'); render(); pane(); };
+      list.appendChild(r);
+    });
+  }
+
+  function pane() {
+    var p = $('pane'); p.textContent = '';
+    if (!cur) { p.appendChild(el('div', 'empty', 'Pili ug usa ka request sa lista.')); return; }
+    var t = cur;
+    var h = el('h2', '', '🙏 ' + (t.name || 'Bisita'));
+    var back = el('button', 'btn alt', '◀ Lista'); back.onclick = function () { $('grid').classList.remove('open'); };
+    if (matchMedia('(max-width:800px)').matches) h.appendChild(back);
+    p.appendChild(h);
+    var w = el('div', 'msgs');
+    t.msgs.forEach(function (m) {
+      var b = el('div', 'm ' + m.r); b.appendChild(document.createTextNode(m.t)); b.appendChild(el('small', '', (m.r === 'a' ? 'BCM Admin · ' : '') + fmt(m.at))); w.appendChild(b);
+    });
+    p.appendChild(w); setTimeout(function () { w.scrollTop = w.scrollHeight; }, 0);
+    var ta = el('textarea'); ta.rows = 3; ta.maxLength = 1000; ta.placeholder = 'Isulat ang imong reply...'; p.appendChild(ta);
+    var send = el('button', 'btn', 'REPLY'), cp = el('button', 'btn alt', 'Copy request'), del = el('button', 'btn red', '🗑 Delete'), er = el('div', 'err');
+    send.onclick = function () {
+      if (!ta.value.trim()) return; send.disabled = true; er.textContent = '';
+      api({ action: 'reply', password: pw, token: t.token, text: ta.value }).then(function (d) {
+        var i = threads.findIndex(function (x) { return x.token === t.token; }); if (i > -1) threads[i] = d.thread; cur = d.thread; render(); pane();
+      }).catch(function (e) { er.textContent = e.message; send.disabled = false; });
+    };
+    cp.onclick = function () {
+      var txt = (t.name || '') + ': ' + t.msgs.filter(function (m) { return m.r === 'v'; }).map(function (m) { return m.t; }).join('\n');
+      (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { cp.textContent = 'Na-copy ✓'; }).catch(function () { cp.textContent = 'Dili ma-copy'; });
+    };
+    del.onclick = function () {
+      if (!confirm('I-delete ning chat ni ' + (t.name || 'bisita') + '? Dili na kini mabalik.')) return;
+      api({ action: 'delete', password: pw, token: t.token }).then(function () {
+        threads = threads.filter(function (x) { return x.token !== t.token; }); cur = null; $('grid').classList.remove('open'); render(); pane();
+      }).catch(function (e) { er.textContent = e.message; });
+    };
+    [send, cp, del, er].forEach(function (n) { p.appendChild(n); });
+  }
+
+  $('go').onclick = function () { $('lerr').textContent = ''; if ($('pw').value) login($('pw').value); };
+  $('pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('go').click(); });
+  $('rf').onclick = load;
+  $('q').addEventListener('input', render);
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.onclick = function () { document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); filter = b.dataset.f; render(); };
+  });
+  $('out').onclick = function () { try { sessionStorage.removeItem('bcm_chat_admin'); } catch (e) {} location.reload(); };
+  var saved = ''; try { saved = sessionStorage.getItem('bcm_chat_admin') || ''; } catch (e) {}
+  if (saved) login(saved, true);
+})();
+</script>
+</body>
+</html>

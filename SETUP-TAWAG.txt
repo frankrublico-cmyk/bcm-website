@@ -1,0 +1,28 @@
+SETUP (isa ra ka higayon)
+1. Cloudinary.com -> libre nga account. Sa Dashboard kopyaha: Cloud name, API Key, API Secret.
+2. Netlify -> Site configuration -> Environment variables, idugang:
+   CLOUDINARY_CLOUD_NAME   = (imong cloud name)
+   CLOUDINARY_API_KEY      = (imong api key)
+   CLOUDINARY_API_SECRET   = (imong api secret)
+   ADMIN_PASSWORD          = (imong gipili nga password)
+3. I-deploy ning tibuok nga folder (i-unzip una, unya i-drag ang FOLDER sa Netlify Deploys).
+   Importante: kinahanglan apil ang folder nga "netlify".
+4. Ablihi ang website -> scroll sa ubos sa Home -> "Admin" -> butangi ang password.
+   Makita na ang Upload ug ang Delete button sa matag post.
+
+BAG-O: bcm-fx.js = after-effects (splash intro, ember particles, cursor glow, neon borders, 3D tilt, glitch title, page wipe, scroll progress).
+Ang tantra.png (8.6 MB) gipulihan sa tantra.jpg (0.4 MB) para paspas ang pag-load.
+
+DAGHANG PASSWORD: sa ADMIN_PASSWORD pwede ka magbutang ug daghan, ginbulag sa comma.
+Pananglitan: boss123,pastor456,media789   (matag tawo naay lahi nga password)
+Kung gusto nimo bawion ang access sa usa, kuhaa ra ang iyang password sa lista ug i-redeploy.
+
+PRAYER REQUEST CHAT (Prayer page)
+Dugang variable sa Netlify:  CHAT_ADMIN_PASSWORD = (password sa chat admin; pwede daghan, gibulag sa comma)
+Ang bisita nagsulat sa pangalan + request. Ikaw: Prayer page -> "Admin Chat" -> password -> makita ang lista, mag-reply, mag-delete.
+Gigamit ang samang Cloudinary account, wala nay bag-ong account.
+
+PERFORMANCE: gikuha ang mga effects nga mabug-at (blur, rotating borders, tilt, shadowBlur). Naay "✨ Effects: ON/OFF" nga button sa ubos-wala; i-click aron i-off ang tanang effects.
+
+ADMIN PAGE SA PRAYER REQUESTS: Prayer-Admin.html (naay button nga "Admin Chat" sa Prayer page). Password = CHAT_ADMIN_PASSWORD.
+Importante: mo-work ra ang chat inig na-deploy sa Netlify. Dili mo-work kung gi-abli lang ang file sa kompyuter (Failed to fetch).

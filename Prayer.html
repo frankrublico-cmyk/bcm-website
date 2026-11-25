@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prayer Request - Breaking Chain</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png?v=4">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=4">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=4">
+    <link rel="shortcut icon" href="favicon-48.png?v=4">
+    <meta name="theme-color" content="#06080c">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Base Themes & Setup */
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            color: #e2e8f0; 
+            margin: 0; 
+            padding: 0; 
+            text-align: center; 
+            line-height: 1.7;
+            overflow-x: hidden;
+            background-color: #06080c;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* --- FIXED & LOCKED: HIGH-IMPACT CYBER-CINEMATIC TANTRA BACKGROUND --- */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(6, 8, 12, 0.45) 0%, 
+                rgba(6, 8, 12, 0.60) 50%, 
+                rgba(6, 8, 12, 0.85) 100%
+            ), url('tantra.jpg') no-repeat center center;
+            background-size: cover;
+            filter: contrast(1.22) brightness(0.92) saturate(1.15);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* --- GLOBAL BACKGROUND ANINIPOT --- */
+        .aninipot-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* --- ADVANCED MULTI-COLOR NEON ANINIPOT EFFECT --- */
+        .aninipot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: lutaw 8s infinite ease-in-out, rainbowNeon 4s infinite linear;
+            opacity: 0;
+        }
+
+        .aninipot:nth-child(1) { left: 20%; top: 80%; animation-delay: 0s; width: 5px; height: 5px; }
+        .aninipot:nth-child(2) { left: 45%; top: 60%; animation-delay: 1.5s; width: 7px; height: 7px; }
+        .aninipot:nth-child(3) { left: 70%; top: 75%; animation-delay: 3s; width: 4px; height: 4px; }
+        .aninipot:nth-child(4) { left: 85%; top: 50%; animation-delay: 4.5s; width: 8px; height: 8px; }
+
+        @keyframes lutaw {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            30% { opacity: 0.8; }
+            70% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
+        }
+
+        @keyframes rainbowNeon {
+            0% { background: #00d2ff; box-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
+            25% { background: #ff007f; box-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; }
+            50% { background: #39ff14; box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14; }
+            75% { background: #9d00ff; box-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff; }
+            100% { background: #00d2ff; box-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
+        }
+
+        /* --- CLEAN HIGH-IMPACT GAMING RIPPLE EFFECT --- */
+        .gaming-ripple-effect {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: transparent;
+            border: 3px solid #ff4d4d;
+            box-shadow: 0 0 15px #ff4d4d, inset 0 0 15px #ff4d4d;
+            pointer-events: none;
+            z-index: 2000;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .gaming-ripple-effect.active {
+            animation: burstRipple 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes burstRipple {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.9;
+                border-color: #ff4d4d;
+                box-shadow: 0 0 10px #ff4d4d, inset 0 0 5px #ff4d4d;
+            }
+            50% {
+                border-color: #d4af37;
+                box-shadow: 0 0 25px #d4af37, inset 0 0 10px #d4af37;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(10);
+                opacity: 0;
+                border-color: #00d2ff;
+                box-shadow: 0 0 40px rgba(0, 210, 255, 0), inset 0 0 20px rgba(0, 210, 255, 0);
+            }
+        }
+
+        /* --- UPDATED NAVIGATION INTERFACE: LASER FLARE SHIMMER --- */
+        nav { 
+            background: rgba(6, 8, 12, 0.92); 
+            padding: 16px 20px; 
+            border-bottom: 3px solid #ff4d4d; 
+            box-shadow: 0 4px 25px rgba(255, 77, 77, 0.45);
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 14px;
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+        nav a { 
+            color: #d4af37; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900; 
+            font-size: 15px; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-radius: 6px;
+            background: #0d111a; 
+            border: 2px solid rgba(212, 175, 55, 0.45);
+            position: relative;
+            overflow: hidden; 
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+
+        /* High-Impact White Flare Light Shimmer Engine */
+        nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 80px; 
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.9) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-35deg); 
+            animation: lightGlint 3s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes lightGlint {
+            0% { left: -150%; }
+            35% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            background: #141b29;
+            border-color: #ff4d4d;
+            text-shadow: 0 0 10px #ff4d4d, 0 0 20px #ff4d4d;
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.6);
+            transform: translateY(-3px);
+        }
+
+        nav a:hover::before {
+            animation: lightGlint 1s infinite linear;
+        }
+
+        /* Layout Container */
+        .content { 
+            padding: 20px; 
+            max-width: 700px; 
+            margin: auto; 
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Logo Area */
+        .logo-container {
+            margin: 30px auto 10px auto;
+            max-width: 160px;
+            width: 100%;
+        }
+        .main-logo {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.3));
+            transition: transform 0.4s ease;
+        }
+        .main-logo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 20px rgba(255, 77, 77, 0.6));
+        }
+
+        /* Gaming RGB Gradient Animation For Title */
+        @keyframes gamingRGB {
+            0% { color: #ff3333; filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.6)); }
+            20% { color: #33ff33; filter: drop-shadow(0 0 8px rgba(51, 255, 51, 0.6)); }
+            40% { color: #3333ff; filter: drop-shadow(0 0 8px rgba(51, 51, 255, 0.6)); }
+            60% { color: #cc33ff; filter: drop-shadow(0 0 8px rgba(204, 51, 255, 0.6)); }
+            80% { color: #ffff33; filter: drop-shadow(0 0 8px rgba(255, 255, 51, 0.6)); }
+            100% { color: #ff3333; filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.6)); }
+        }
+
+        h2 { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(32px, 6vw, 48px); 
+            text-transform: uppercase; 
+            margin: 20px 0 10px 0;
+            letter-spacing: 2px;
+            font-weight: 900;
+            animation: gamingRGB 6s infinite linear;
+        }
+
+        p { 
+            font-size: clamp(18px, 4vw, 22px); 
+            color: #e2e8f0;
+            margin-bottom: 40px; 
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
+        }
+        
+        /* High-Tier Neon Gaming Messenger Button with Flare Shimmer */
+        .tg-btn { 
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0084ff 0%, #a334fa 100%); 
+            color: #fff; 
+            text-decoration: none; 
+            padding: 22px 35px; 
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900; 
+            border-radius: 50px; 
+            font-size: clamp(16px, 3.8vw, 22px);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 2px solid #0084ff;
+            box-shadow: 0 0 20px rgba(0, 162, 255, 0.5);
+            width: 85%;
+            max-width: 500px;
+            transition: all 0.3s ease;
+            animation: buttonPulse 2.5s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tg-btn::before {
+            content: ''; position: absolute; top: 0; left: -150%; width: 45%; height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-35deg); animation: lightGlint 4s infinite linear;
+        }
+
+        @keyframes buttonPulse {
+            0% { box-shadow: 0 0 15px rgba(0, 162, 255, 0.5); border-color: #00a2ff; }
+            50% { box-shadow: 0 0 30px rgba(255, 77, 77, 0.8), 0 0 10px #ff4d4d; border-color: #ff4d4d; }
+            100% { box-shadow: 0 0 15px rgba(0, 162, 255, 0.5); border-color: #00a2ff; }
+        }
+
+        .tg-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            background: linear-gradient(135deg, #3399ff 0%, #c25cff 100%);
+            color: #fff;
+            box-shadow: 0 0 40px #fff, 0 0 25px #00a2ff;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 60px;
+            color: #a0aec0;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            letter-spacing: 1px;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+        .back-link:hover {
+            color: #fff;
+            text-shadow: 0 0 10px #fff;
+        }
+
+        /* --- CINEMATIC INTERACTIVE FLOATING MUSIC CONTROLLER WIDGET --- */
+        .music-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(13, 17, 26, 0.9);
+            border: 2px solid #d4af37;
+            padding: 10px 16px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+        .music-widget:hover {
+            box-shadow: 0 0 25px #ff4d4d;
+            border-color: #ff4d4d;
+        }
+        .music-btn {
+            background: transparent;
+            border: none;
+            color: #d4af37;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .music-widget:hover .music-btn {
+            color: #ff4d4d;
+        }
+        /* Audio visualizer wave elements */
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            width: 15px;
+            height: 15px;
+        }
+        .bar {
+            width: 3px;
+            height: 100%;
+            background: #d4af37;
+            border-radius: 2px;
+            animation: bounce 1s infinite ease-in-out alternate;
+            animation-play-state: paused;
+        }
+        .music-widget:hover .bar { background: #ff4d4d; }
+        .bar:nth-child(2) { animation-delay: 0.3s; }
+        .bar:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes bounce {
+            10% { height: 30%; }
+            100% { height: 100%; }
+        }
+        .playing .bar { animation-play-state: running; }
+
+        /* Mobile Viewport Adjustments */
+        @media (max-width: 480px) {
+            nav { padding: 14px 8px; gap: 10px; }
+            nav a { font-size: 13px; padding: 12px 14px; border-radius: 6px; width: 45%; box-sizing: border-box; }
+            .content { padding: 10px; }
+            .logo-container { max-width: 120px; }
+            .tg-btn { padding: 18px 20px; }
+            .music-widget { bottom: 15px; right: 15px; padding: 8px 12px; }
+        }
+    
+        /* ===== COMPACT RESPONSIVE NAV (phone / tablet / desktop) ===== */
+        nav { padding: 8px 10px !important; gap: 8px !important; flex-wrap: nowrap !important; justify-content: center !important; }
+        nav a { flex: 0 1 auto !important; width: auto !important; min-width: 0; box-sizing: border-box !important; flex-direction: row; gap: 6px;
+                font-size: 12px !important; letter-spacing: 1px !important; padding: 8px 14px !important; border-width: 1.5px !important;
+                border-radius: 7px !important; white-space: nowrap; line-height: 1.1; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+        nav a:hover { transform: none !important; }
+        nav a .ni { font-size: 1.15em; line-height: 1; }
+        @media (min-width: 1025px) { nav a { font-size: 13px !important; padding: 9px 20px !important; } nav { gap: 12px !important; } }
+        @media (max-width: 599px) {
+            nav { padding: 6px 5px !important; gap: 4px !important; }
+            nav a { flex: 1 1 0 !important; flex-direction: column; gap: 3px; font-size: 9px !important; letter-spacing: .3px !important;
+                    padding: 6px 2px !important; border-radius: 6px !important; }
+            nav a .ni { font-size: 17px; }
+            nav a::before { display: none; }
+            nav.nav6 { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 5px !important; }
+            nav.nav6 a { flex-direction: row; gap: 5px; font-size: 9.5px !important; padding: 7px 3px !important; }
+            nav.nav6 a .ni { font-size: 14px; }
+        }
+        @media (max-width: 359px) { nav a { font-size: 8px !important; letter-spacing: 0 !important; } }
+    </style>
+</head>
+<body id="main-body">
+
+    <div id="gaming-effect" class="gaming-ripple-effect"></div>
+
+    <div class="bg-overlay"></div>
+    <div class="aninipot-container">
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+    </div>
+
+    <audio id="prayer-audio" src="bisan-pag-lutoson-ka-padayon-cry.mp3" loop></audio>
+
+    <div class="music-widget" id="music-node">
+        <div class="visualizer" id="visualizer-node">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <button class="music-btn" onclick="toggleMusicState(event)">
+            🔊 Music: <span id="status-text">OFF</span>
+        </button>
+    </div>
+
+    <nav>
+        <a href="index.html"><span class="ni">🏠</span><span class="nt">Home</span></a>
+        <a href="Warfare.html"><span class="ni">📅</span><span class="nt">Schedules</span></a>
+        <a href="Bible.html"><span class="ni">📖</span><span class="nt">Bible</span></a>
+        <a href="Journal.html"><span class="ni">📝</span><span class="nt">Journal</span></a>
+        <a href="Prayer.html" style="color:#fff; border-color: #ff4d4d; box-shadow: 0 0 12px #ff4d4d;"><span class="ni">🙏</span><span class="nt">Prayer</span></a>
+    </nav>
+
+    <div class="content">
+        
+        <div class="logo-container">
+            <img src="bcm.png" alt="Breaking Chain Ministry Logo" class="main-logo">
+        </div>
+
+        <h2>Need Prayer?</h2>
+        <p>We are here to stand with you in faith.</p>
+        
+        <div id="bcm-chat"></div>
+        
+        <br>
+        <a href="index.html" class="back-link">◀ BACK TO HOME</a>
+    </div>
+
+    <script type="text/javascript">
+        const bodyElement = document.getElementById('main-body');
+        const gamingEffectElement = document.getElementById('gaming-effect');
+        const prayerAudio = document.getElementById('prayer-audio');
+        const musicNode = document.getElementById('music-node');
+        const statusText = document.getElementById('status-text');
+        
+        let initialClickInteraction = false;
+
+        // Triggers the track loop upon user click node pathway
+        function startAudioOnInteraction() {
+            if (!initialClickInteraction) {
+                prayerAudio.play().then(() => {
+                    musicNode.classList.add('playing');
+                    statusText.innerText = "ON";
+                    initialClickInteraction = true;
+                }).catch(err => {
+                    console.log("Browser navigation pathway blocked auto execution:", err);
+                });
+            }
+        }
+
+        function toggleMusicState(e) {
+            e.stopPropagation(); // Stops interface background ripple node from triggering
+            if (prayerAudio.paused) {
+                prayerAudio.play();
+                musicNode.classList.add('playing');
+                statusText.innerText = "ON";
+                initialClickInteraction = true;
+            } else {
+                prayerAudio.pause();
+                musicNode.classList.remove('playing');
+                statusText.innerText = "OFF";
+            }
+        }
+
+        // Shockwave Ripple Event Node
+        function triggerGamingRipple(e) {
+            startAudioOnInteraction(); 
+
+            let clickX, clickY;
+            if (e.type === 'touchstart') {
+                clickX = e.touches[0].clientX;
+                clickY = e.touches[0].clientY;
+            } else {
+                clickX = e.clientX;
+                clickY = e.clientY;
+            }
+
+            gamingEffectElement.style.left = clickX + 'px';
+            gamingEffectElement.style.top = clickY + 'px';
+
+            gamingEffectElement.classList.remove('active');
+            void gamingEffectElement.offsetWidth; // Force Reflow sequence
+            gamingEffectElement.classList.add('active');
+        }
+
+        bodyElement.addEventListener('click', triggerGamingRipple);
+        bodyElement.addEventListener('touchstart', triggerGamingRipple, {passive: true});
+    </script>
+
+    <script src="bcm-chat.js"></script>
+    <script src="bcm-fx.js" defer></script>
+</body>
+</html>

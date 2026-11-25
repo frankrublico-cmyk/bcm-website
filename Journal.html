@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Bible Journal - Breaking Chain</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png?v=4">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=4">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=4">
+    <link rel="shortcut icon" href="favicon-48.png?v=4">
+    <meta name="theme-color" content="#06080c">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Base Themes & Setup */
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            color: #e2e8f0; 
+            margin: 0; 
+            padding: 0; 
+            text-align: center; 
+            line-height: 1.7;
+            overflow-x: hidden;
+            background-color: #06080c;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* --- FIXED & LOCKED: HIGH-IMPACT CYBER-CINEMATIC TANTRA BACKGROUND --- */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(6, 8, 12, 0.45) 0%, 
+                rgba(6, 8, 12, 0.60) 50%, 
+                rgba(6, 8, 12, 0.85) 100%
+            ), url('tantra.jpg') no-repeat center center;
+            background-size: cover;
+            filter: contrast(1.22) brightness(0.92) saturate(1.15);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* --- GLOBAL BACKGROUND ANINIPOT --- */
+        .aninipot-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .aninipot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: lutaw 8s infinite ease-in-out, rainbowNeon 4s infinite linear;
+            opacity: 0;
+        }
+        .aninipot:nth-child(1) { left: 10%; top: 80%; animation-delay: 0s; width: 5px; height: 5px; }
+        .aninipot:nth-child(2) { left: 35%; top: 65%; animation-delay: 1.8s; width: 7px; height: 7px; }
+        .aninipot:nth-child(3) { left: 65%; top: 75%; animation-delay: 3.2s; width: 4px; height: 4px; }
+        .aninipot:nth-child(4) { left: 85%; top: 55%; animation-delay: 4.8s; width: 8px; height: 8px; }
+
+        @keyframes lutaw {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            30% { opacity: 0.6; }
+            70% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
+        }
+
+        /* --- DYNAMIC NEON RAINBOW EFFECT --- */
+        @keyframes rainbowNeon {
+            0% { background: #00d2ff; box-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
+            25% { background: #ff007f; box-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; }
+            50% { background: #39ff14; box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14; }
+            75% { background: #9d00ff; box-shadow: 0 0 10px #9d00ff, 0 0 20px #9d00ff; }
+            100% { background: #00d2ff; box-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
+        }
+
+        /* --- INSIDE BOX ANINIPOT ENGINE --- */
+        .box-aninipot-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1; 
+        }
+        .box-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: boxLutaw 7s infinite ease-in-out, rainbowNeon 4s infinite linear;
+            opacity: 0;
+        }
+        
+        .box-particle:nth-child(1) { left: 12%; animation-delay: 0s; width: 5px; height: 5px; }
+        .box-particle:nth-child(2) { left: 28%; animation-delay: 2.5s; width: 7px; height: 7px; }
+        .box-particle:nth-child(3) { left: 45%; animation-delay: 1.2s; width: 4px; height: 4px; }
+        .box-particle:nth-child(4) { left: 62%; animation-delay: 4.8s; width: 6px; height: 6px; }
+        .box-particle:nth-child(5) { left: 78%; animation-delay: 3.5s; width: 5px; height: 5px; }
+        .box-particle:nth-child(6) { left: 90%; animation-delay: 5.8s; width: 8px; height: 8px; }
+
+        @keyframes boxLutaw {
+            0% { transform: translateY(110%) translateX(0); opacity: 0; }
+            25% { opacity: 0.6; }
+            75% { opacity: 0.6; }
+            100% { transform: translateY(-10%) translateX(40px); opacity: 0; }
+        }
+
+        /* --- CLEAN HIGH-IMPACT GAMING RIPPLE EFFECT --- */
+        .gaming-ripple-effect {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: transparent;
+            border: 3px solid #ff4d4d;
+            box-shadow: 0 0 15px #ff4d4d, inset 0 0 15px #ff4d4d;
+            pointer-events: none;
+            z-index: 2000;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .gaming-ripple-effect.active {
+            animation: burstRipple 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes burstRipple {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; border-color: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
+            50% { border-color: #d4af37; box-shadow: 0 0 25px #d4af37; }
+            100% { transform: translate(-50%, -50%) scale(8); opacity: 0; border-color: #00d2ff; }
+        }
+
+        /* --- UPDATED NAVIGATION INTERFACE: LASER FLARE SHIMMER --- */
+        nav { 
+            background: rgba(6, 8, 12, 0.92); 
+            padding: 16px 20px; 
+            border-bottom: 3px solid #ff4d4d; 
+            box-shadow: 0 4px 25px rgba(255, 77, 77, 0.45);
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 14px;
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+        nav a { 
+            color: #d4af37; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900; 
+            font-size: 15px; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-radius: 6px;
+            background: #0d111a; 
+            border: 2px solid rgba(212, 175, 55, 0.45);
+            position: relative;
+            overflow: hidden; 
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+
+        /* High-Impact White Flare Light Shimmer Engine */
+        nav a::before, .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 80px; 
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.9) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-35deg); 
+            animation: lightGlint 3s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes lightGlint {
+            0% { left: -150%; }
+            35% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            background: #141b29;
+            border-color: #ff4d4d;
+            text-shadow: 0 0 10px #ff4d4d, 0 0 20px #ff4d4d;
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.6);
+            transform: translateY(-3px);
+        }
+
+        nav a:hover::before {
+            animation: lightGlint 1s infinite linear;
+        }
+
+        /* Layout Area Wrapper */
+        .content { 
+            padding: 15px; 
+            max-width: 900px; 
+            margin: auto; 
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Clean Logo Area */
+        .logo-container {
+            margin: 15px auto 5px auto;
+            max-width: 130px;
+            width: 100%;
+        }
+        .main-logo {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.4));
+        }
+
+        /* Gaming RGB Gradient Title */
+        @keyframes gamingRGB {
+            0% { color: #ff3333; filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.6)); }
+            20% { color: #33ff33; filter: drop-shadow(0 0 8px rgba(51, 255, 51, 0.6)); }
+            40% { color: #3333ff; filter: drop-shadow(0 0 8px rgba(51, 51, 255, 0.6)); }
+            60% { color: #cc33ff; filter: drop-shadow(0 0 8px rgba(204, 51, 255, 0.6)); }
+            80% { color: #ffff33; filter: drop-shadow(0 0 8px rgba(255, 255, 51, 0.6)); }
+            100% { color: #ff3333; filter: drop-shadow(0 0 8px rgba(255, 51, 51, 0.6)); }
+        }
+
+        h2 { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(28px, 5vw, 44px); 
+            text-transform: uppercase; 
+            margin: 10px 0 20px 0;
+            letter-spacing: 2px;
+            font-weight: 900;
+            animation: gamingRGB 6s infinite linear;
+        }
+
+        /* Cybernetic Neon Journal Box Terminal Wrapper */
+        .journal-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 0 15px rgba(212, 175, 55, 0.1);
+            background: rgba(11, 15, 23, 0.92);
+            backdrop-filter: blur(4px);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        
+        #journal-box { 
+            width: 100%; 
+            height: 520px; 
+            background: transparent; 
+            color: #f0f4f8; 
+            border: none; 
+            outline: none; 
+            padding: 22px; 
+            font-size: 19px; 
+            font-family: 'Outfit', sans-serif; 
+            line-height: 1.8; 
+            resize: vertical;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 2; 
+        }
+        
+        .journal-container:focus-within {
+            border-color: #ff4d4d;
+            box-shadow: 0 0 30px rgba(255, 77, 77, 0.5), inset 0 0 20px rgba(255, 77, 77, 0.2);
+        }
+
+        /* Interactive Buttons pack */
+        .btn-wrapper {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 5px;
+            margin-bottom: 30px;
+        }
+
+        .action-btn { 
+            background: linear-gradient(135deg, #d4af37 0%, #b8901c 100%); 
+            color: #000; 
+            padding: 15px 35px; 
+            border: 1px solid #d4af37;
+            border-radius: 50px; 
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900; 
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn:hover { 
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 30px rgba(255, 77, 77, 0.8), 0 0 10px #ff4d4d;
+            background: linear-gradient(135deg, #fff 0%, #d4af37 100%);
+            border-color: #ff4d4d;
+            color: #000;
+        }
+        .action-btn:hover::before {
+            animation: lightGlint 1s infinite linear;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important; 
+            color: #a0aec0 !important;
+            border: 1px solid #4a5568 !important;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
+        }
+        .download-btn:hover {
+            color: #fff !important;
+            border-color: #00a2ff !important;
+            box-shadow: 0 0 25px rgba(0, 162, 255, 0.6) !important;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%) !important;
+        }
+
+        /* Mobile Viewport Spacing Patches */
+        @media (max-width: 480px) {
+            nav { padding: 14px 8px; gap: 10px; }
+            nav a { font-size: 13px; padding: 12px 14px; border-radius: 6px; width: 45%; box-sizing: border-box; }
+            .content { padding: 10px; }
+            .logo-container { max-width: 90px; }
+            h2 { margin: 5px 0 15px 0; }
+            #journal-box { 
+                height: 65vh; 
+                font-size: 17px; 
+                padding: 15px;
+            }
+            .journal-container { margin-bottom: 20px; }
+            .action-btn { width: 100%; padding: 14px 20px; font-size: 14px; }
+            .btn-wrapper { gap: 10px; margin-bottom: 10px; }
+        }
+    
+        /* ===== COMPACT RESPONSIVE NAV (phone / tablet / desktop) ===== */
+        nav { padding: 8px 10px !important; gap: 8px !important; flex-wrap: nowrap !important; justify-content: center !important; }
+        nav a { flex: 0 1 auto !important; width: auto !important; min-width: 0; box-sizing: border-box !important; flex-direction: row; gap: 6px;
+                font-size: 12px !important; letter-spacing: 1px !important; padding: 8px 14px !important; border-width: 1.5px !important;
+                border-radius: 7px !important; white-space: nowrap; line-height: 1.1; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+        nav a:hover { transform: none !important; }
+        nav a .ni { font-size: 1.15em; line-height: 1; }
+        @media (min-width: 1025px) { nav a { font-size: 13px !important; padding: 9px 20px !important; } nav { gap: 12px !important; } }
+        @media (max-width: 599px) {
+            nav { padding: 6px 5px !important; gap: 4px !important; }
+            nav a { flex: 1 1 0 !important; flex-direction: column; gap: 3px; font-size: 9px !important; letter-spacing: .3px !important;
+                    padding: 6px 2px !important; border-radius: 6px !important; }
+            nav a .ni { font-size: 17px; }
+            nav a::before { display: none; }
+            nav.nav6 { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 5px !important; }
+            nav.nav6 a { flex-direction: row; gap: 5px; font-size: 9.5px !important; padding: 7px 3px !important; }
+            nav.nav6 a .ni { font-size: 14px; }
+        }
+        @media (max-width: 359px) { nav a { font-size: 8px !important; letter-spacing: 0 !important; } }
+    </style>
+</head>
+<body id="main-body">
+
+    <div id="gaming-effect" class="gaming-ripple-effect"></div>
+
+    <div class="bg-overlay"></div>
+    <div class="aninipot-container">
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+        <div class="aninipot"></div>
+    </div>
+
+    <nav>
+        <a href="index.html"><span class="ni">🏠</span><span class="nt">Home</span></a>
+        <a href="Warfare.html"><span class="ni">📅</span><span class="nt">Schedules</span></a>
+        <a href="Bible.html"><span class="ni">📖</span><span class="nt">Bible</span></a>
+        <a href="Journal.html" style="color:#fff; border-color: #ff4d4d; box-shadow: 0 0 12px #ff4d4d;"><span class="ni">📝</span><span class="nt">Journal</span></a>
+        <a href="Prayer.html"><span class="ni">🙏</span><span class="nt">Prayer</span></a>
+    </nav>
+
+    <div class="content">
+        
+        <div class="logo-container">
+            <img src="bcm.png" alt="Breaking Chain Ministry Logo" class="main-logo">
+        </div>
+
+        <h2>My Bible Journal</h2>
+        
+        <div class="journal-container">
+            <div class="box-aninipot-container">
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+                <div class="box-particle"></div>
+            </div>
+            <textarea id="journal-box" placeholder="Sugdi ang pagsulat sa imong mga pamalandong dinhi, Warrior..."></textarea>
+        </div>
+        
+        <div class="btn-wrapper">
+            <button class="action-btn" onclick="saveJournal()">⚡ Save Entry</button>
+            <button class="action-btn download-btn" onclick="downloadJournal()">💾 Download .txt</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // --- Core Internal System Node Storage Logic ---
+        const box = document.getElementById('journal-box');
+        box.value = localStorage.getItem('myBibleJournal') || '';
+
+        // Added dynamic focus line handler para sa setup tracking
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log("Journal dashboard initialized cleanly. Audio engine detached.");
+        });
+
+        function saveJournal() {
+            localStorage.setItem('myBibleJournal', box.value);
+            alert('Journal Successfully Saved into Local Storage!');
+        }
+
+        function downloadJournal() {
+            const text = box.value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'MyBibleJournal.txt';
+            a.click();
+        }
+
+        // --- JavaScript Engine to execute High-Impact Gaming Ripple FX ---
+        const bodyElement = document.getElementById('main-body');
+        const gamingEffectElement = document.getElementById('gaming-effect');
+
+        function triggerGamingRipple(e) {
+            let clickX, clickY;
+            if (e.type === 'touchstart') {
+                clickX = e.touches[0].clientX;
+                clickY = e.touches[0].clientY;
+            } else {
+                clickX = e.clientX;
+                clickY = e.clientY;
+            }
+
+            gamingEffectElement.style.left = clickX + 'px';
+            gamingEffectElement.style.top = clickY + 'px';
+
+            gamingEffectElement.classList.remove('active');
+            void gamingEffectElement.offsetWidth; // Force Reflow sequence
+            gamingEffectElement.classList.add('active');
+        }
+
+        bodyElement.addEventListener('click', triggerGamingRipple);
+        bodyElement.addEventListener('touchstart', triggerGamingRipple, {passive: true});
+    </script>
+    <script src="bcm-fx.js" defer></script>
+</body>
+</html>
