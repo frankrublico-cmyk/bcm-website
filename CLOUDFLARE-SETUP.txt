@@ -1,0 +1,5 @@
+CLOUDFLARE PAGES SETUP - tan-awa ang step-by-step sa chat.
+Variables (Settings > Variables and Secrets):
+  CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET (Secret), ADMIN_PASSWORD (Secret), CHAT_ADMIN_PASSWORD (Secret)
+KV binding (Settings > Bindings > KV namespace): Variable name = CHAT
+Build command: (blanko)   Build output directory: /
