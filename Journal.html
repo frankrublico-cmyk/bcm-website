@@ -351,6 +351,16 @@
             background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%) !important;
         }
 
+        .paper-select {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: #e2e8f0; border: 1px solid #d4af37; border-radius: 50px;
+            padding: 14px 20px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px;
+            cursor: pointer; outline: none;
+        }
+        .paper-select:focus { border-color: #00a2ff; }
+        .download-btn:disabled { opacity: 0.6; cursor: wait; }
+        #pdf-msg { text-align: center; color: #a0aec0; font-size: 13px; min-height: 18px; margin: -14px 0 24px 0; }
+
         /* Mobile Viewport Spacing Patches */
         @media (max-width: 480px) {
             nav { padding: 14px 8px; gap: 10px; }
@@ -431,8 +441,14 @@
         
         <div class="btn-wrapper">
             <button class="action-btn" onclick="saveJournal()">⚡ Save Entry</button>
-            <button class="action-btn download-btn" onclick="downloadJournal()">💾 Download .txt</button>
+            <select id="paper-size" class="paper-select" title="Gidak-on sa papel">
+                <option value="a4">A4 (210 x 297 mm)</option>
+                <option value="short">Short (8.5 x 11 in)</option>
+                <option value="long">Long (8.5 x 13 in)</option>
+            </select>
+            <button id="pdf-btn" class="action-btn download-btn" onclick="downloadJournal()">📄 Download PDF</button>
         </div>
+        <div id="pdf-msg"></div>
     </div>
 
     <script type="text/javascript">
@@ -450,15 +466,272 @@
             alert('Journal Successfully Saved into Local Storage!');
         }
 
-        function downloadJournal() {
-            const text = box.value;
+        function pdfClean(s) {
+            return String(s == null ? '' : s)
+                .replace(/[*#`]/g, '')
+                .replace(/[\u2018\u2019\u02BC]/g, "'")
+                .replace(/[\u201C\u201D]/g, '"')
+                .replace(/\u2026/g, '...')
+                .replace(/[\u2013\u2014]/g, '-')
+                .replace(/[^\u0020-\u007E\u00A0-\u00FF]/g, '')
+                .replace(/[ \t\u00A0]+/g, ' ')
+                .trim();
+        }
+        function fileSlug(s) {
+            return pdfClean(s).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50) || 'dokumento';
+        }
+
+        async function ensureJsPDF() {
+            if (window.jspdf && window.jspdf.jsPDF) return true;
+            await new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                s.onload = res;
+                s.onerror = () => rej(new Error('jsPDF load failed'));
+                document.head.appendChild(s);
+            });
+            return !!(window.jspdf && window.jspdf.jsPDF);
+        }
+
+        function loadLogo() {
+            return new Promise(res => {
+                const im = new Image();
+                im.onload = () => {
+                    try {
+                        const hh = 180, ww = Math.round(im.naturalWidth * hh / im.naturalHeight);
+                        const c = document.createElement('canvas'); c.width = ww; c.height = hh;
+                        c.getContext('2d').drawImage(im, 0, 0, ww, hh);
+                        res({ data: c.toDataURL('image/png'), w: ww, h: hh });
+                    } catch (e) { res(null); }
+                };
+                im.onerror = () => res(null);
+                im.src = 'bcm.png';
+            });
+        }
+
+        function buildPdf(paper, data, logo) {
+            const { jsPDF } = window.jspdf;
+            const sizes = { a4: [210, 297], short: [215.9, 279.4], long: [215.9, 330.2] };
+            const dim = sizes[paper] || sizes.a4;
+            const W = dim[0], H = dim[1];
+            const doc = new jsPDF({ unit: 'mm', format: [W, H], orientation: 'portrait' });
+            const mx = 18, mt = 20, mb = 22, cw = W - 2 * mx;
+            const BODY = 11.5, LH = 5.8;
+            let y = 0;
+            const setC = c => doc.setTextColor(c[0], c[1], c[2]);
+            const fill = c => doc.setFillColor(c[0], c[1], c[2]);
+            const newPage = () => { doc.addPage([W, H], 'portrait'); y = mt; };
+            const need = h => { if (y + h > H - mb) newPage(); };
+            const wrap = (text, w, font, style, size) => { doc.setFont(font, style); doc.setFontSize(size); return doc.splitTextToSize(text, w); };
+
+            /* ---- banner ---- */
+            const bh = 36;
+            fill([13, 16, 23]); doc.rect(0, 0, W, bh, 'F');
+            fill([139, 0, 0]); doc.rect(0, bh, W, 1.6, 'F');
+            fill([212, 175, 55]); doc.rect(0, bh + 1.6, W, 0.6, 'F');
+            let tx = mx;
+            if (logo) {
+                const lh = 24, lw = lh * logo.w / logo.h;
+                try { doc.addImage(logo.data, 'PNG', mx, 6, lw, lh); tx = mx + lw + 6; } catch (e) {}
+            }
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(17); setC([212, 175, 55]);
+            doc.text('BREAKING CHAIN MINISTRY', tx, 16);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); setC([203, 213, 225]);
+            doc.text(data.kicker, tx, 23);
+            let dateStr = '';
+            try { dateStr = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) {}
+            doc.setFontSize(8.5); setC([148, 163, 184]);
+            doc.text(pdfClean(dateStr), tx, 29);
+            y = bh + 14;
+
+            /* ---- title ---- */
+            const tl = wrap(data.title, cw, 'helvetica', 'bold', 19);
+            tl.forEach(l => {
+                need(9);
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(19); setC([15, 23, 42]);
+                doc.text(l, mx, y); y += 8.5;
+            });
+            fill([212, 175, 55]); doc.rect(mx, y - 3, 28, 1.2, 'F');
+            y += 7;
+
+            /* ---- block renderers ---- */
+            function para(text, indent, color) {
+                const ls = wrap(text, cw - indent, 'times', 'normal', BODY);
+                ls.forEach(l => {
+                    need(LH);
+                    doc.setFont('times', 'normal'); doc.setFontSize(BODY); setC(color || [30, 41, 59]);
+                    doc.text(l, mx + indent, y); y += LH;
+                });
+                y += 2.5;
+            }
+            function section(h, color) {
+                const hl = wrap(h, cw - 8, 'helvetica', 'bold', 11);
+                const barH = 5.2 * hl.length + 3;
+                need(barH + LH * 2 + 6);
+                y += 3;
+                fill(color); doc.roundedRect(mx, y - 4.4, cw, barH, 1.5, 1.5, 'F');
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+                setC(color[0] < 40 ? [212, 175, 55] : [255, 255, 255]);
+                hl.forEach((l, i) => doc.text(l, mx + 4, y + i * 5.2));
+                y += barH + 4.5;
+            }
+            function quote(paras) {
+                paras.forEach(p => {
+                    const ls = wrap(p, cw - 12, 'times', 'italic', BODY);
+                    ls.forEach(l => {
+                        need(LH);
+                        fill([250, 245, 230]); doc.rect(mx, y - 4.3, cw, LH + 0.3, 'F');
+                        fill([212, 175, 55]); doc.rect(mx, y - 4.3, 1.6, LH + 0.3, 'F');
+                        doc.setFont('times', 'italic'); doc.setFontSize(BODY); setC([68, 52, 10]);
+                        doc.text(l, mx + 6, y); y += LH;
+                    });
+                    y += 1.2;
+                });
+                y += 2.5;
+            }
+            function label(t, color) {
+                const ls = wrap(t, cw, 'helvetica', 'bold', 10.5);
+                need(LH * 2 + 2);
+                y += 1;
+                ls.forEach(l => {
+                    need(5.4);
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); setC(color);
+                    doc.text(l, mx, y); y += 5.2;
+                });
+                y += 0.6;
+            }
+            function sub(t) {
+                const ls = wrap(t, cw - 6, 'helvetica', 'bold', 12);
+                need(LH * 2 + 4);
+                y += 2.5;
+                ls.forEach(l => {
+                    need(6.4);
+                    fill([212, 175, 55]); doc.rect(mx, y - 4.2, 1.4, 5.6, 'F');
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); setC([15, 23, 42]);
+                    doc.text(l, mx + 4, y); y += 6;
+                });
+                y += 1;
+            }
+            function bullet(t) {
+                const ls = wrap(t, cw - 8, 'times', 'normal', BODY);
+                ls.forEach((l, i) => {
+                    need(LH);
+                    if (i === 0) { fill([139, 0, 0]); doc.circle(mx + 2.2, y - 1.3, 0.8, 'F'); }
+                    doc.setFont('times', 'normal'); doc.setFontSize(BODY); setC([30, 41, 59]);
+                    doc.text(l, mx + 6, y); y += LH;
+                });
+                y += 1.5;
+            }
+
+            data.blocks.forEach(b => {
+                if (b.t === 'section') section(b.h, b.color);
+                else if (b.t === 'quote') quote(b.paras);
+                else if (b.t === 'label') label(b.text, b.color);
+                else if (b.t === 'sub') sub(b.text);
+                else if (b.t === 'bullet') bullet(b.text);
+                else para(b.text, b.indent || 0);
+            });
+
+            /* ---- footer on every page ---- */
+            const n = doc.getNumberOfPages();
+            for (let i = 1; i <= n; i++) {
+                doc.setPage(i);
+                fill([212, 175, 55]); doc.rect(mx, H - 14, cw, 0.4, 'F');
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); setC([100, 116, 139]);
+                doc.text('Breaking Chain Ministry', mx, H - 9.5);
+                doc.text('Pahina ' + i + ' / ' + n, W - mx, H - 9.5, { align: 'right' });
+            }
+            return doc;
+        }
+
+
+        /* ===================== JOURNAL -> PDF ===================== */
+        function setPdfMsg(t) { const m = document.getElementById('pdf-msg'); if (m) m.textContent = t || ''; }
+
+        function journalHeadingColor(t) {
+            const u = t.toUpperCase();
+            if (/SPIRITUAL|ESPIRITU/.test(u)) return [109, 40, 217];
+            if (/PHYSICAL|PISIKAL/.test(u)) return [14, 116, 144];
+            if (/APPLICATION|PAGGAMIT/.test(u)) return [194, 65, 12];
+            if (/ACTION|BUHATON/.test(u)) return [190, 18, 60];
+            if (/SUPPORTING|KADUGTONG/.test(u)) return [21, 128, 61];
+            return [15, 23, 42];
+        }
+        function isJournalHeading(t) {
+            const letters = t.replace(/[^A-Za-z]/g, '');
+            return letters.length >= 4 && letters === letters.toUpperCase() && t.length <= 100;
+        }
+
+        function parseJournal(text) {
+            const blocks = [];
+            let title = 'My Bible Journal', kicker = 'Personal nga Pamalandong', first = true;
+            let verseBuf = [];
+            const flushVerses = () => { if (verseBuf.length) { blocks.push({ t: 'quote', paras: verseBuf }); verseBuf = []; } };
+            String(text || '').split('\n').forEach(line => {
+                const r0 = line.trim();
+                if (!r0) { flushVerses(); return; }
+                const t0 = pdfClean(r0);
+                if (!t0) return;
+                if (first) {
+                    first = false;
+                    if (isJournalHeading(t0)) {
+                        title = t0.replace(/\s*KASAYURAN BAHIN SA KAMATUORAN\s*$/i, '') || t0;
+                        kicker = 'My Bible Journal';
+                        return;
+                    }
+                }
+                if (/^\[?\s*verse\s*\d+[\]:]?/i.test(t0)) { verseBuf.push(t0); return; }
+                flushVerses();
+                if (isJournalHeading(t0)) { blocks.push({ t: 'section', h: t0, color: journalHeadingColor(t0) }); return; }
+                const mm = r0.match(/^[\u2022\-\u2013*]\s+(.*)$/);
+                if (mm) { const b = pdfClean(mm[1]); if (b) blocks.push({ t: 'bullet', text: b }); return; }
+                blocks.push({ t: 'para', text: t0 });
+            });
+            flushVerses();
+            if (!blocks.length) blocks.push({ t: 'para', text: '(Walay sulod)' });
+            const d = new Date().toISOString().slice(0, 10);
+            return { fileName: 'BCM-Journal-' + d, kicker: kicker, title: title, blocks: blocks };
+        }
+
+        function downloadTxt(text) {
             const blob = new Blob([text], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = 'MyBibleJournal.txt';
-            a.click();
+            a.href = url; a.download = 'MyBibleJournal.txt';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
         }
+
+        async function downloadJournal() {
+            const text = box.value;
+            if (!text.trim()) { setPdfMsg('Walay sulod ang journal. Pagsulat una.'); return; }
+            const btn = document.getElementById('pdf-btn');
+            btn.disabled = true;
+            setPdfMsg('Gihimo ang PDF...');
+            try {
+                let ready = false;
+                try { ready = await ensureJsPDF(); } catch (e) { ready = false; }
+                if (!ready) {
+                    downloadTxt(text);
+                    setPdfMsg('Walay internet para sa PDF, busa .txt ang na-download.');
+                    return;
+                }
+                const logo = await loadLogo();
+                const paper = document.getElementById('paper-size').value;
+                try { localStorage.setItem('bcm_paper', paper); } catch (e) {}
+                const data = parseJournal(text);
+                const doc = buildPdf(paper, data, logo);
+                doc.save(data.fileName + '.pdf');
+                setPdfMsg('✓ Na-download na ang PDF!');
+            } catch (e) {
+                console.error(e);
+                setPdfMsg('Naay sayop sa paghimo sa PDF. Sulayi usab.');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+        try { const sp = localStorage.getItem('bcm_paper'); if (sp) document.getElementById('paper-size').value = sp; } catch (e) {}
+
 
         // --- JavaScript Engine to execute High-Impact Gaming Ripple FX ---
         const bodyElement = document.getElementById('main-body');
