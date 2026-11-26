@@ -167,6 +167,27 @@
         .word-document-body ul, .word-document-body ol { margin: 0 0 16px 20px; padding: 0; }
         .word-document-body li { margin-bottom: 8px; line-height: 1.75; }
 
+        .export-bar {
+            display: none; position: sticky; bottom: -22px; margin: 18px -22px -22px; padding: 12px 22px; z-index: 5;
+            background: #0a0d14; border-top: 1px solid rgba(212,175,55,0.45);
+            flex-wrap: wrap; gap: 8px; align-items: center;
+        }
+        .word-modal-card .export-bar { bottom: -40px; margin: 24px -45px -40px; padding: 12px 45px; background: #ffffff; border-top: 1px solid #e2e8f0; }
+        .export-bar select {
+            background: #111827; color: #fff; border: 1px solid #d4af37; border-radius: 8px;
+            padding: 8px 10px; font-size: 13px; font-family: inherit;
+        }
+        .export-bar button {
+            border: none; border-radius: 8px; padding: 9px 14px; font-weight: 700; font-size: 13px;
+            cursor: pointer; font-family: inherit;
+        }
+        .export-bar button:disabled { opacity: 0.6; cursor: wait; }
+        .export-bar .pdf-btn { background: linear-gradient(135deg, #d4af37, #b8860b); color: #111; }
+        .export-bar .copy-btn { background: transparent; color: #d4af37; border: 1px solid #d4af37; }
+        .word-modal-card .export-bar .copy-btn { color: #8a6d0b; border-color: #8a6d0b; }
+        #exportMsg { font-size: 12px; color: #9ca3af; }
+        .word-modal-card #exportMsg { color: #475569; }
+
         .insights-close-btn {
             position: absolute; top: 12px; right: 12px; background: #ff4d4d;
             color: white; border: none; width: 28px; height: 28px; border-radius: 50%;
@@ -472,6 +493,18 @@
 
                 <!-- WORD DOCUMENT LAYOUT CONTAINER FOR SEARCH TOPIC -->
                 <div id="aiWordContentBox" class="word-document-body" style="display:none;"></div>
+
+                <!-- EXPORT BAR: PDF + COPY -->
+                <div id="exportBar" class="export-bar">
+                    <select id="paperSize" title="Gidak-on sa papel">
+                        <option value="a4">A4 (210 x 297 mm)</option>
+                        <option value="short">Short (8.5 x 11 in)</option>
+                        <option value="long">Long (8.5 x 13 in)</option>
+                    </select>
+                    <button id="pdfBtn" class="pdf-btn" onclick="downloadPDF()">📄 I-download ang PDF</button>
+                    <button class="copy-btn" onclick="copyContent()">📋 Copy</button>
+                    <span id="exportMsg"></span>
+                </div>
             </div>
         </div>
 
@@ -696,6 +729,318 @@
             return formattedHTML;
         }
 
+        /* ===================== EXPORT: PDF + COPY ===================== */
+        let _exportKind = null;
+        let _sermonData = { keyword: '', raw: '' };
+
+        function setExportMsg(t) { const m = document.getElementById('exportMsg'); if (m) m.textContent = t || ''; }
+        function showExportBar(isWordDoc, raw, keyword) {
+            _exportKind = isWordDoc ? 'sermon' : 'insights';
+            if (isWordDoc) _sermonData = { keyword: keyword || '', raw: raw || '' };
+            const bar = document.getElementById('exportBar');
+            if (bar) bar.style.display = 'flex';
+            setExportMsg('');
+            try { const p = localStorage.getItem('bcm_paper'); if (p && document.getElementById('paperSize')) document.getElementById('paperSize').value = p; } catch (e) {}
+        }
+        function hideExportBar() {
+            const bar = document.getElementById('exportBar');
+            if (bar) bar.style.display = 'none';
+            _exportKind = null;
+            setExportMsg('');
+        }
+
+        function pdfClean(s) {
+            return String(s == null ? '' : s)
+                .replace(/[*#`]/g, '')
+                .replace(/[\u2018\u2019\u02BC]/g, "'")
+                .replace(/[\u201C\u201D]/g, '"')
+                .replace(/\u2026/g, '...')
+                .replace(/[\u2013\u2014]/g, '-')
+                .replace(/[^\u0020-\u007E\u00A0-\u00FF]/g, '')
+                .replace(/[ \t\u00A0]+/g, ' ')
+                .trim();
+        }
+        function fileSlug(s) {
+            return pdfClean(s).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50) || 'dokumento';
+        }
+
+        function collectInsights() {
+            const g = id => { const e = document.getElementById(id); return e ? e.innerText : ''; };
+            return {
+                title: g('insVerseTitle'),
+                verses: g('insVerseText'),
+                sections: [
+                    { h: 'Espirituhanong Kahulogan (Spiritual Realm)', t: g('insSpiritualRealm'), c: [109, 40, 217] },
+                    { h: 'Pisikal nga Epekto (Physical Realm)', t: g('insPhysicalRealm'), c: [14, 116, 144] },
+                    { h: 'Practical Application (Paggamit sa Kinabuhi)', t: g('insApplication'), c: [194, 65, 12] },
+                    { h: 'Saktong Buhaton Karon (Action Step)', t: g('insActionStep'), c: [190, 18, 60] },
+                    { h: 'Mga Kadugtong nga Bersikulo (Supporting Verses)', t: g('insSupportingVerses'), c: [21, 128, 61] }
+                ]
+            };
+        }
+
+        function insightsToDoc(d) {
+            const ref = pdfClean(d.title).replace(/\s*KASAYURAN BAHIN SA KAMATUORAN\s*$/i, '') || 'Kasayuran';
+            const blocks = [];
+            const vs = String(d.verses || '').split('\n').map(pdfClean).filter(Boolean);
+            if (vs.length) blocks.push({ t: 'quote', paras: vs });
+            d.sections.forEach(s => {
+                blocks.push({ t: 'section', h: pdfClean(s.h), color: s.c });
+                String(s.t || '').split('\n').map(pdfClean).filter(Boolean).forEach(p => blocks.push({ t: 'para', text: p }));
+            });
+            return { fileName: 'BCM-Kasayuran-' + fileSlug(ref), kicker: 'Kasayuran bahin sa Kamatuoran', title: ref, blocks: blocks };
+        }
+
+        function parseSermon(d) {
+            const blocks = [];
+            let title = pdfClean(d.keyword) || 'Sermon';
+            let afterFoundation = false;
+            const GOLD = [161, 98, 7], NAVY = [15, 23, 42];
+            String(d.raw || '').split('\n').forEach(line => {
+                const r0 = line.trim();
+                if (!r0) return;
+                const t0 = pdfClean(r0);
+                if (!t0) return;
+                if (/^title\s*:/i.test(t0)) { title = t0.replace(/^title\s*:\s*/i, '') || title; afterFoundation = false; return; }
+                if (/^pundasyon nga teksto\s*:?/i.test(t0)) {
+                    blocks.push({ t: 'label', text: 'Pundasyon nga Teksto', color: GOLD });
+                    const rest = t0.replace(/^pundasyon nga teksto\s*:?\s*/i, '');
+                    if (rest) blocks.push({ t: 'quote', paras: [rest] }); else afterFoundation = true;
+                    return;
+                }
+                if (/^(I|II|III|IV|V)\.\s/.test(t0)) { blocks.push({ t: 'section', h: t0, color: NAVY }); afterFoundation = false; return; }
+                if (afterFoundation) { blocks.push({ t: 'quote', paras: [t0] }); afterFoundation = false; return; }
+
+                let r = r0, bullet = false, num = null, mm;
+                mm = r.match(/^[\u2022\-\u2013*]\s+(.*)$/); if (mm) { bullet = true; r = mm[1]; }
+                mm = r.match(/^(\d+)[\.\)]\s+(.*)$/); if (mm) { num = mm[1]; r = mm[2]; }
+                const t = pdfClean(r);
+                if (!t) return;
+                const lm = t.match(/^([^:]{3,90}):\s+(.+)$/);
+                if (lm && /^(Gibase sa Bersikulo|Pagsira nga Bersikulo)/i.test(lm[1])) {
+                    blocks.push({ t: 'label', text: lm[1], color: GOLD });
+                    blocks.push({ t: 'quote', paras: [lm[2]] });
+                    return;
+                }
+                if (lm && (bullet || num || /^(Eksplikasyon|Panawagan|Aplikasyon)/i.test(lm[1]))) {
+                    blocks.push({ t: 'label', text: (num ? num + '. ' : '') + lm[1], color: [139, 0, 0] });
+                    blocks.push({ t: 'para', text: lm[2], indent: 4 });
+                    return;
+                }
+                if (num && t.length <= 110 && !lm) { blocks.push({ t: 'sub', text: num + '. ' + t }); return; }
+                if (bullet || num) { blocks.push({ t: 'bullet', text: (num ? num + '. ' : '') + t }); return; }
+                blocks.push({ t: 'para', text: t });
+            });
+            return { fileName: 'BCM-Sermon-' + fileSlug(title), kicker: 'Sermon Outline', title: title, blocks: blocks };
+        }
+
+        async function ensureJsPDF() {
+            if (window.jspdf && window.jspdf.jsPDF) return true;
+            await new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                s.onload = res;
+                s.onerror = () => rej(new Error('jsPDF load failed'));
+                document.head.appendChild(s);
+            });
+            return !!(window.jspdf && window.jspdf.jsPDF);
+        }
+
+        function loadLogo() {
+            return new Promise(res => {
+                const im = new Image();
+                im.onload = () => {
+                    try {
+                        const hh = 180, ww = Math.round(im.naturalWidth * hh / im.naturalHeight);
+                        const c = document.createElement('canvas'); c.width = ww; c.height = hh;
+                        c.getContext('2d').drawImage(im, 0, 0, ww, hh);
+                        res({ data: c.toDataURL('image/png'), w: ww, h: hh });
+                    } catch (e) { res(null); }
+                };
+                im.onerror = () => res(null);
+                im.src = 'bcm.png';
+            });
+        }
+
+        function buildPdf(paper, data, logo) {
+            const { jsPDF } = window.jspdf;
+            const sizes = { a4: [210, 297], short: [215.9, 279.4], long: [215.9, 330.2] };
+            const dim = sizes[paper] || sizes.a4;
+            const W = dim[0], H = dim[1];
+            const doc = new jsPDF({ unit: 'mm', format: [W, H], orientation: 'portrait' });
+            const mx = 18, mt = 20, mb = 22, cw = W - 2 * mx;
+            const BODY = 11.5, LH = 5.8;
+            let y = 0;
+            const setC = c => doc.setTextColor(c[0], c[1], c[2]);
+            const fill = c => doc.setFillColor(c[0], c[1], c[2]);
+            const newPage = () => { doc.addPage([W, H], 'portrait'); y = mt; };
+            const need = h => { if (y + h > H - mb) newPage(); };
+            const wrap = (text, w, font, style, size) => { doc.setFont(font, style); doc.setFontSize(size); return doc.splitTextToSize(text, w); };
+
+            /* ---- banner ---- */
+            const bh = 36;
+            fill([13, 16, 23]); doc.rect(0, 0, W, bh, 'F');
+            fill([139, 0, 0]); doc.rect(0, bh, W, 1.6, 'F');
+            fill([212, 175, 55]); doc.rect(0, bh + 1.6, W, 0.6, 'F');
+            let tx = mx;
+            if (logo) {
+                const lh = 24, lw = lh * logo.w / logo.h;
+                try { doc.addImage(logo.data, 'PNG', mx, 6, lw, lh); tx = mx + lw + 6; } catch (e) {}
+            }
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(17); setC([212, 175, 55]);
+            doc.text('BREAKING CHAIN MINISTRY', tx, 16);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); setC([203, 213, 225]);
+            doc.text(data.kicker, tx, 23);
+            let dateStr = '';
+            try { dateStr = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }); } catch (e) {}
+            doc.setFontSize(8.5); setC([148, 163, 184]);
+            doc.text(pdfClean(dateStr), tx, 29);
+            y = bh + 14;
+
+            /* ---- title ---- */
+            const tl = wrap(data.title, cw, 'helvetica', 'bold', 19);
+            tl.forEach(l => {
+                need(9);
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(19); setC([15, 23, 42]);
+                doc.text(l, mx, y); y += 8.5;
+            });
+            fill([212, 175, 55]); doc.rect(mx, y - 3, 28, 1.2, 'F');
+            y += 7;
+
+            /* ---- block renderers ---- */
+            function para(text, indent, color) {
+                const ls = wrap(text, cw - indent, 'times', 'normal', BODY);
+                ls.forEach(l => {
+                    need(LH);
+                    doc.setFont('times', 'normal'); doc.setFontSize(BODY); setC(color || [30, 41, 59]);
+                    doc.text(l, mx + indent, y); y += LH;
+                });
+                y += 2.5;
+            }
+            function section(h, color) {
+                const hl = wrap(h, cw - 8, 'helvetica', 'bold', 11);
+                const barH = 5.2 * hl.length + 3;
+                need(barH + LH * 2 + 6);
+                y += 3;
+                fill(color); doc.roundedRect(mx, y - 4.4, cw, barH, 1.5, 1.5, 'F');
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+                setC(color[0] < 40 ? [212, 175, 55] : [255, 255, 255]);
+                hl.forEach((l, i) => doc.text(l, mx + 4, y + i * 5.2));
+                y += barH + 4.5;
+            }
+            function quote(paras) {
+                paras.forEach(p => {
+                    const ls = wrap(p, cw - 12, 'times', 'italic', BODY);
+                    ls.forEach(l => {
+                        need(LH);
+                        fill([250, 245, 230]); doc.rect(mx, y - 4.3, cw, LH + 0.3, 'F');
+                        fill([212, 175, 55]); doc.rect(mx, y - 4.3, 1.6, LH + 0.3, 'F');
+                        doc.setFont('times', 'italic'); doc.setFontSize(BODY); setC([68, 52, 10]);
+                        doc.text(l, mx + 6, y); y += LH;
+                    });
+                    y += 1.2;
+                });
+                y += 2.5;
+            }
+            function label(t, color) {
+                const ls = wrap(t, cw, 'helvetica', 'bold', 10.5);
+                need(LH * 2 + 2);
+                y += 1;
+                ls.forEach(l => {
+                    need(5.4);
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); setC(color);
+                    doc.text(l, mx, y); y += 5.2;
+                });
+                y += 0.6;
+            }
+            function sub(t) {
+                const ls = wrap(t, cw - 6, 'helvetica', 'bold', 12);
+                need(LH * 2 + 4);
+                y += 2.5;
+                ls.forEach(l => {
+                    need(6.4);
+                    fill([212, 175, 55]); doc.rect(mx, y - 4.2, 1.4, 5.6, 'F');
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); setC([15, 23, 42]);
+                    doc.text(l, mx + 4, y); y += 6;
+                });
+                y += 1;
+            }
+            function bullet(t) {
+                const ls = wrap(t, cw - 8, 'times', 'normal', BODY);
+                ls.forEach((l, i) => {
+                    need(LH);
+                    if (i === 0) { fill([139, 0, 0]); doc.circle(mx + 2.2, y - 1.3, 0.8, 'F'); }
+                    doc.setFont('times', 'normal'); doc.setFontSize(BODY); setC([30, 41, 59]);
+                    doc.text(l, mx + 6, y); y += LH;
+                });
+                y += 1.5;
+            }
+
+            data.blocks.forEach(b => {
+                if (b.t === 'section') section(b.h, b.color);
+                else if (b.t === 'quote') quote(b.paras);
+                else if (b.t === 'label') label(b.text, b.color);
+                else if (b.t === 'sub') sub(b.text);
+                else if (b.t === 'bullet') bullet(b.text);
+                else para(b.text, b.indent || 0);
+            });
+
+            /* ---- footer on every page ---- */
+            const n = doc.getNumberOfPages();
+            for (let i = 1; i <= n; i++) {
+                doc.setPage(i);
+                fill([212, 175, 55]); doc.rect(mx, H - 14, cw, 0.4, 'F');
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); setC([100, 116, 139]);
+                doc.text('Breaking Chain Ministry', mx, H - 9.5);
+                doc.text('Pahina ' + i + ' / ' + n, W - mx, H - 9.5, { align: 'right' });
+            }
+            return doc;
+        }
+
+        async function downloadPDF() {
+            if (!_exportKind) return;
+            const btn = document.getElementById('pdfBtn');
+            setExportMsg('Gihimo ang PDF...');
+            if (btn) btn.disabled = true;
+            try {
+                await ensureJsPDF();
+                const logo = await loadLogo();
+                const paper = document.getElementById('paperSize').value;
+                try { localStorage.setItem('bcm_paper', paper); } catch (e) {}
+                const data = _exportKind === 'sermon' ? parseSermon(_sermonData) : insightsToDoc(collectInsights());
+                const doc = buildPdf(paper, data, logo);
+                doc.save(data.fileName + '.pdf');
+                setExportMsg('✓ Na-download na ang PDF!');
+            } catch (e) {
+                console.error(e);
+                setExportMsg('Wala ma-download (kinahanglan og internet). Gamita ang Copy.');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function copyContent() {
+            if (!_exportKind) return;
+            let text = '';
+            if (_exportKind === 'sermon') {
+                text = String(_sermonData.raw || '').replace(/[*#`]/g, '').trim();
+            } else {
+                const d = collectInsights();
+                text = d.title + '\n\n' + d.verses + '\n\n' + d.sections.map(s => s.h.toUpperCase() + '\n' + s.t).join('\n\n');
+            }
+            text += '\n\n- Breaking Chain Ministry';
+            const ok = () => setExportMsg('✓ Na-copy na! I-paste na kini.');
+            const fallback = () => {
+                const ta = document.createElement('textarea');
+                ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); ok(); } catch (e) { setExportMsg('Dili ma-copy. I-select ug i-copy manually.'); }
+                document.body.removeChild(ta);
+            };
+            if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(ok).catch(fallback);
+            else fallback();
+        }
+
         /* 1. OPEN VERSE SELECTION INSIGHTS */
         async function openVerseInsightsModal() {
             if (selectedVersesMap.size === 0) return;
@@ -725,6 +1070,7 @@
             document.getElementById('insightsModal').style.display = 'flex';
             document.getElementById('highlightPopup').style.display = 'none';
 
+            hideExportBar();
             document.getElementById('aiLoading').style.display = 'block';
 
             const promptText = `Ayaw pag-gamit og markdown symbols (*, **, #) o backticks.
@@ -750,6 +1096,7 @@ Ihatag ang tubag sa EXACT JSON format:
             document.getElementById('aiContentBox').style.display = 'none';
             document.getElementById('aiWordContentBox').style.display = 'none';
             document.getElementById('insightsModal').style.display = 'flex';
+            hideExportBar();
             document.getElementById('aiLoading').style.display = 'block';
 
             const sermonPrompt = `Ayaw gyud pag-gamit og markdown symbols (*, **, #) o backticks.
@@ -877,6 +1224,7 @@ IV. Konklusyon & Panawagan (Call to Action)
                                 document.getElementById('aiContentBox').style.display = 'block';
                             }
                             
+                            showExportBar(isWordDoc, aiRawText, searchKeyword);
                             success = true;
                             break;
                         }
