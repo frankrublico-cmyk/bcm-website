@@ -794,6 +794,17 @@ IV. Konklusyon & Panawagan (Call to Action)
         /* Sleep delay function for Rate Limit Auto-retry */
         const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+        /* Gemini key gikan sa Cloudflare (gitago sa GitHub) */
+        let _gk = null;
+        async function getGeminiKey() {
+            if (_gk) return _gk;
+            const r = await fetch('/api/aikey');
+            const j = await r.json();
+            if (!j.key) throw new Error(j.error || 'Wala ang key');
+            _gk = j.key;
+            return _gk;
+        }
+
         /* 3. CORE MULTI-MODEL FALLBACK ENGINE WITH RETRY LOGIC */
         async function callGeminiAI(promptText, isWordDoc = false, searchKeyword = "") {
             const modelEndpoints = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
@@ -802,12 +813,12 @@ IV. Konklusyon & Panawagan (Call to Action)
             let errs = [];
 
             for (let modelName of modelEndpoints) {
-                let retries = 2;
+                let retries = 1;
                 let delayMs = 1500;
 
                 while (retries > 0) {
                     try {
-                        let apiUrl = `/api/ai?model=${modelName}`;
+                        let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${await getGeminiKey()}`;
                         
                         let response = await fetch(apiUrl, {
                             method: 'POST',
