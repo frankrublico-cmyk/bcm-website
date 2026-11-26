@@ -493,7 +493,6 @@
 
     <script type="text/javascript">
         // GOOGLE AI STUDIO KEY
-        const GEMINI_API_KEY = "AQ.Ab8RN6IRZRT6QHsha9PUVwJXtOkZI4tN4XsPEiZrdzOvgP0AsA";
 
         let currentBooks = [];
         let selectedVersesMap = new Map();
@@ -797,7 +796,7 @@ IV. Konklusyon & Panawagan (Call to Action)
 
         /* 3. CORE MULTI-MODEL FALLBACK ENGINE WITH RETRY LOGIC */
         async function callGeminiAI(promptText, isWordDoc = false, searchKeyword = "") {
-            const modelEndpoints = ['gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+            const modelEndpoints = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
             let success = false;
             let lastErr = "";
 
@@ -807,7 +806,7 @@ IV. Konklusyon & Panawagan (Call to Action)
 
                 while (retries > 0) {
                     try {
-                        let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
+                        let apiUrl = `/api/ai?model=${modelName}`;
                         
                         let response = await fetch(apiUrl, {
                             method: 'POST',
