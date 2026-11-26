@@ -796,9 +796,10 @@ IV. Konklusyon & Panawagan (Call to Action)
 
         /* 3. CORE MULTI-MODEL FALLBACK ENGINE WITH RETRY LOGIC */
         async function callGeminiAI(promptText, isWordDoc = false, searchKeyword = "") {
-            const modelEndpoints = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
+            const modelEndpoints = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
             let success = false;
             let lastErr = "";
+            let errs = [];
 
             for (let modelName of modelEndpoints) {
                 let retries = 2;
@@ -815,6 +816,7 @@ IV. Konklusyon & Panawagan (Call to Action)
                         });
 
                         if (response.status === 429) {
+                            errs.push(modelName + ': 429 rate limit');
                             console.warn(`Rate limit reached on ${modelName}. Retrying in ${delayMs/1000}s...`);
                             await sleep(delayMs);
                             delayMs *= 2;
@@ -870,6 +872,7 @@ IV. Konklusyon & Panawagan (Call to Action)
                     } catch (err) {
                         console.warn(`Model ${modelName} failed:`, err.message);
                         lastErr = err.message;
+                        errs.push(modelName + ': ' + String(err.message).slice(0, 160));
                         break;
                     }
                 }
@@ -878,6 +881,7 @@ IV. Konklusyon & Panawagan (Call to Action)
             }
 
             if (!success) {
+                lastErr = errs.length ? errs.join('\n') : lastErr;
                 if (isWordDoc) {
                     document.getElementById('aiWordContentBox').innerHTML = `<p style="color:red; text-align:center;">Dili ma-generate ang Sermon. Status: ${lastErr}</p>`;
                     document.getElementById('aiWordContentBox').style.display = 'block';

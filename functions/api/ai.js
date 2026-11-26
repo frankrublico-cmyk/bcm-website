@@ -30,8 +30,21 @@ export async function onRequestPost({ request, env }) {
       body: JSON.stringify({ contents: [{ parts: [{ text }] }] }),
     }
   );
-  return new Response(await r.text(), {
-    status: r.status,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-  });
+  const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
+  const t = await r.text();
+  if (!r.ok) return new Response(t, { status: r.status, headers });
+
+  // kuhaon ang tinuod nga text (laktawan ang "thought" parts)
+  let out = '';
+  try {
+    const j = JSON.parse(t);
+    const cand = j.candidates && j.candidates[0];
+    const parts = (cand && cand.content && cand.content.parts) || [];
+    out = parts.filter(p => typeof p.text === 'string' && !p.thought).map(p => p.text).join('');
+    if (!out) {
+      const why = (cand && cand.finishReason) || (j.promptFeedback && j.promptFeedback.blockReason) || 'walay sulod';
+      return err('Walay text nga gibalik (' + why + ')', 502);
+    }
+  } catch (e) { return err('Sayop ang tubag sa Gemini.', 502); }
+  return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: out }] } }] }), { status: 200, headers });
 }
