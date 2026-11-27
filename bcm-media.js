@@ -37,6 +37,54 @@
     '.bf-lb{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:5000;display:flex;align-items:center;justify-content:center;cursor:zoom-out}',
     '.bf-lb img{max-width:96vw;max-height:94vh;object-fit:contain}'
   ].join('');
+  css.textContent += `
+.bf-media{overflow:hidden}
+.bf-sl{position:absolute;inset:0;opacity:0;pointer-events:none}
+.bf-sl.on{opacity:1;pointer-events:auto;z-index:1;animation:bfIn0 .9s ease-out both}
+.bf-sl.out{opacity:0;transition:opacity .9s;z-index:0}
+.fx1 .bf-sl.on{animation-name:bfIn1}
+.fx2 .bf-sl.on{animation-name:bfIn2}
+.fx3 .bf-sl.on{animation-name:bfIn3}
+@keyframes bfIn0{from{opacity:0}to{opacity:1}}
+@keyframes bfIn1{from{opacity:0;transform:scale(1.35)}to{opacity:1;transform:none}}
+@keyframes bfIn2{from{opacity:0;transform:translateX(14%)}to{opacity:1;transform:none}}
+@keyframes bfIn3{from{opacity:0;transform:translateX(-14%) scale(1.12) rotate(-2deg)}to{opacity:1;transform:none}}
+.bf-sl.on img{animation:bfKB0 9s ease-out both}
+.kb1 .bf-sl.on img{animation-name:bfKB1}
+@keyframes bfKB0{from{transform:scale(1)}to{transform:scale(1.09)}}
+@keyframes bfKB1{from{transform:scale(1.09) translateX(2%)}to{transform:scale(1)}}
+.bf-media::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.38) 50%,transparent 62%);transform:translateX(-120%)}
+.bf-media.shine::after{animation:bfShine .9s ease-out}
+@keyframes bfShine{from{transform:translateX(-120%)}to{transform:translateX(120%)}}
+.bf-sparks{position:absolute;inset:0;z-index:3;pointer-events:none}
+.bf-sparks span{position:absolute;color:#ffe08a;opacity:0;text-shadow:0 0 6px #ffd24d;animation:bfTw 2.6s ease-in-out infinite}
+@keyframes bfTw{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1.1) rotate(45deg)}}
+.bf-card{animation:bfBorder 4s ease-in-out infinite alternate}
+@keyframes bfBorder{from{border-color:rgba(255,77,77,.3)}to{border-color:rgba(0,210,255,.6)}}
+.bf-prog{position:absolute;left:0;bottom:0;width:100%;height:3px;z-index:4;background:linear-gradient(90deg,#00d2ff,#39ff14,#d4af37);transform-origin:left;transform:scaleX(0);pointer-events:none}
+.bf-prog.run{animation:bfProg linear forwards}
+@keyframes bfProg{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.bf-card:not(.vis) *,.bf-card:not(.vis){animation-play-state:paused}
+.lite .bf-sl.on,.lite .bf-sl.on img,.lite .bf-card{animation:none}
+.lite .bf-sparks,.lite .bf-media::after{display:none}
+.noreact .bf-act,.noreact .bf-cm{display:none}
+.bf-act{position:relative;display:flex;gap:8px;flex-wrap:wrap;padding:8px 12px 10px}
+.bf-pill{background:#111827;border:1px solid #334155;color:#e2e8f0;border-radius:20px;padding:6px 12px;cursor:pointer;font-size:14px;display:inline-flex;gap:6px;align-items:center;font-family:inherit}
+.bf-pill.on{border-color:#ff4d4d;background:rgba(255,77,77,.18)}
+.bf-pill b{font-weight:700;min-width:8px}
+.bf-float{position:absolute;pointer-events:none;font-size:20px;z-index:6;animation:bfFloat 1s ease-out forwards}
+@keyframes bfFloat{from{opacity:1;transform:translate(0,0) scale(.8)}to{opacity:0;transform:translate(var(--dx),-80px) scale(1.4)}}
+.bf-cm{padding:0 12px 12px;border-top:1px solid rgba(255,255,255,.08)}
+.bf-cm-list{max-height:240px;overflow-y:auto;margin:8px 0}
+.bf-cm-row{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.bf-cm-h{display:flex;gap:8px;align-items:center;font-size:13px;color:#a0aec0}
+.bf-cm-h b{color:#d4af37}
+.bf-cm-t{color:#e2e8f0;font-size:14px;white-space:pre-wrap;word-break:break-word;margin-top:2px}
+.bf-cm-empty{color:#a0aec0;font-size:13px;padding:6px 0}
+.bf-cm-x{margin-left:auto;background:#b00020;color:#fff;border:0;border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer}
+.bf-cm input[type=text],.bf-cm textarea{width:100%;box-sizing:border-box;padding:8px;border-radius:8px;border:1px solid #475569;background:#0d111a;color:#fff;font-size:14px;margin:4px 0;font-family:inherit}
+.bf-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+`;
   document.head.appendChild(css);
 
   var pw = '';
@@ -51,8 +99,8 @@
     return e;
   }
 
-  function api(body) {
-    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  function api(body, url) {
+    return fetch(url || API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); });
   }
 
@@ -65,67 +113,240 @@
     return it.url.replace('/upload/', '/upload/so_0,w_800,q_auto/').replace(/\.[a-z0-9]+$/i, '.jpg');
   }
 
+  var IV = 4500;                                   // segundos kada slide (ms)
+  var lite = false;
+  try { lite = localStorage.getItem('bcm_fx') === 'off'; } catch (e) {}
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) lite = true;
+  if (lite) root.classList.add('lite');
+
+  var io = 'IntersectionObserver' in window
+    ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.target._vis) e.target._vis(e.isIntersecting); }); }, { threshold: 0.35 })
+    : null;
+
+  function rapi(body) { return api(body, '/api/react'); }
+  function rget(q) {
+    return fetch('/api/react' + q).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); });
+  }
+  function myR() { try { return JSON.parse(localStorage.getItem('bcm_my_react') || '{}'); } catch (e) { return {}; } }
+  function saveMy(o) { try { localStorage.setItem('bcm_my_react', JSON.stringify(o)); } catch (e) {} }
+  function when(d) {
+    try { return new Date(d).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; }
+  }
+
   function openLightbox(it) {
     var lb = el('div', 'bf-lb'); var big = document.createElement('img');
     big.src = it.url.replace('/upload/', '/upload/f_auto,q_auto,w_2000/'); lb.appendChild(big);
     lb.onclick = function () { lb.remove(); }; document.body.appendChild(lb);
   }
 
-  function slide(it, cap) {
-    if (it.type === 'video') {
-      var v = document.createElement('video');
-      v.controls = true; v.preload = 'none'; v.playsInline = true; v.poster = poster(it); v.src = optimized(it);
-      return v;
+  /* ---------- comments panel ---------- */
+  function commentPanel(pid, setCount) {
+    var box = el('div', 'bf-cm');
+    var list = el('div', 'bf-cm-list');
+    var nm = document.createElement('input'); nm.type = 'text'; nm.maxLength = 40; nm.placeholder = 'Imong pangalan';
+    try { nm.value = localStorage.getItem('bcm_name') || ''; } catch (e) {}
+    var tx = document.createElement('textarea'); tx.rows = 2; tx.maxLength = 300; tx.placeholder = 'Isulat ang imong comment...';
+    var hp = document.createElement('input'); hp.type = 'text'; hp.className = 'bf-hp'; hp.tabIndex = -1; hp.autocomplete = 'off';
+    var send = el('button', 'bf-btn', 'POST');
+    var st = el('div', 'bf-status', '');
+    var opened = Date.now();
+
+    function render(arr) {
+      list.textContent = '';
+      if (!arr.length) list.appendChild(el('div', 'bf-cm-empty', 'Wala pay comment. Ikaw na ang una!'));
+      arr.forEach(function (cm) {
+        var r = el('div', 'bf-cm-row'), h = el('div', 'bf-cm-h');
+        h.appendChild(el('b', '', cm.n)); h.appendChild(el('span', '', when(cm.d)));
+        if (admin) {
+          var x = el('button', 'bf-cm-x', '🗑');
+          x.onclick = function () {
+            if (!confirm('I-delete ning comment?')) return;
+            rapi({ action: 'delcomment', post: pid, cid: cm.i, password: pw }).then(function (d) { render(d.comments || []); }).catch(function (e) { alert(e.message); });
+          };
+          h.appendChild(x);
+        }
+        r.appendChild(h); r.appendChild(el('div', 'bf-cm-t', cm.t)); list.appendChild(r);
+      });
+      list.scrollTop = list.scrollHeight;
+      setCount(arr.length);
     }
-    var im = document.createElement('img');
-    im.loading = 'lazy'; im.alt = cap || 'BCM'; im.src = optimized(it);
-    im.onclick = function () { openLightbox(it); };
-    return im;
+    box.refresh = function () {
+      rget('?post=' + encodeURIComponent(pid)).then(function (d) { render(d.comments || []); })
+        .catch(function () { list.textContent = 'Dili ma-load ang comments karon.'; });
+    };
+    send.onclick = function () {
+      var name = nm.value.trim(), text = tx.value.trim();
+      if (!name) { st.textContent = 'Butangi ang imong pangalan.'; return; }
+      if (!text) { st.textContent = 'Isulat una ang comment.'; return; }
+      send.disabled = true; st.textContent = 'Gipadala...';
+      rapi({ action: 'comment', post: pid, name: name, text: text, hp: hp.value, ms: Date.now() - opened }).then(function (d) {
+        try { localStorage.setItem('bcm_name', name); } catch (e) {}
+        tx.value = ''; st.textContent = '✅ Na-post na!'; render(d.comments || []);
+        setTimeout(function () { send.disabled = false; st.textContent = ''; }, 5000);
+      }).catch(function (e) { st.textContent = '❌ ' + e.message; send.disabled = false; });
+    };
+    [list, nm, tx, hp, send, st].forEach(function (n) { box.appendChild(n); });
+    return box;
   }
 
-  // group = array of items (1 = single post, 2+ = album with slider)
-  function card(group) {
-    var first = group[0];
-    var cap = '';
-    group.forEach(function (g) { if (!cap && g.caption) cap = g.caption; });
-    var c = el('div', 'bf-card');
-    var ratio = first.w && first.h ? first.w / first.h : 16 / 9;
-    var m = el('div', 'bf-media ' + (ratio < 0.9 ? 'port' : ratio > 1.2 ? 'land' : 'sq'));
-    c.appendChild(m);
-    var cur = 0, dots = null;
-
-    function show(i) {
-      cur = (i + group.length) % group.length;
-      var old = m.querySelector('img,video'); if (old) old.remove();
-      m.insertBefore(slide(group[cur], cap), m.firstChild);
-      if (group.length > 1) {
-        m.querySelector('.bf-count').textContent = (cur + 1) + ' / ' + group.length;
-        [].forEach.call(dots.children, function (d, k) { d.className = k === cur ? 'on' : ''; });
+  /* ---------- like / heart / comment bar ---------- */
+  function actionBar(pid, card) {
+    var bar = el('div', 'bf-act');
+    var cnt = { like: 0, heart: 0, com: 0 };
+    var btn = {};
+    function paint() {
+      var mine = myR()[pid] || {};
+      btn.like.nm.textContent = cnt.like; btn.heart.nm.textContent = cnt.heart; btn.com.nm.textContent = cnt.com;
+      btn.like.b.classList.toggle('on', !!mine.like); btn.heart.b.classList.toggle('on', !!mine.heart);
+    }
+    function pill(kind, icon) {
+      var b = el('button', 'bf-pill'); b.appendChild(el('span', '', icon));
+      var n = el('b', '', '0'); b.appendChild(n); bar.appendChild(b);
+      btn[kind] = { b: b, nm: n }; return b;
+    }
+    function burst(from) {
+      if (lite) return;
+      for (var i = 0; i < 6; i++) {
+        var f = el('span', 'bf-float', '❤️');
+        f.style.left = (from.offsetLeft + 10 + Math.random() * 20) + 'px'; f.style.top = from.offsetTop + 'px';
+        f.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
+        f.style.animationDelay = (i * 0.07) + 's';
+        bar.appendChild(f); setTimeout(function (n) { n.remove(); }.bind(null, f), 1400);
       }
     }
-
-    if (group.length > 1) {
-      var cnt = el('span', 'bf-count'); m.appendChild(cnt);
-      var pv = el('button', 'bf-nav prev', '‹'), nx = el('button', 'bf-nav next', '›');
-      pv.onclick = function () { show(cur - 1); }; nx.onclick = function () { show(cur + 1); };
-      m.appendChild(pv); m.appendChild(nx);
-      var sx = null;
-      m.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
-      m.addEventListener('touchend', function (e) {
-        if (sx == null) return; var dx = e.changedTouches[0].clientX - sx; sx = null;
-        if (Math.abs(dx) > 40) show(cur + (dx < 0 ? 1 : -1));
+    function toggle(kind) {
+      var my = myR(); my[pid] = my[pid] || {};
+      var on = !my[pid][kind]; my[pid][kind] = on ? 1 : 0; saveMy(my);
+      cnt[kind] = Math.max(0, cnt[kind] + (on ? 1 : -1)); paint();
+      if (on && kind === 'heart') burst(btn.heart.b);
+      rapi({ action: 'react', post: pid, kind: kind, delta: on ? 1 : -1 }).then(function (d) {
+        cnt.like = d.l; cnt.heart = d.h; paint();
+      }).catch(function () {
+        var m2 = myR(); m2[pid] = m2[pid] || {}; m2[pid][kind] = on ? 0 : 1; saveMy(m2);
+        cnt[kind] = Math.max(0, cnt[kind] + (on ? -1 : 1)); paint();
       });
+    }
+    pill('like', '👍').onclick = function () { toggle('like'); };
+    pill('heart', '❤️').onclick = function () { toggle('heart'); };
+    var panel = null;
+    pill('com', '💬').onclick = function () {
+      if (panel) { panel.remove(); panel = null; return; }
+      panel = commentPanel(pid, function (n) { cnt.com = n; paint(); });
+      card.insertBefore(panel, bar.nextSibling); panel.refresh();
+    };
+    paint();
+    card._set = function (d) { cnt.like = d.l || 0; cnt.heart = d.h || 0; cnt.com = d.n || 0; paint(); };
+    return bar;
+  }
+
+  /* ---------- post card (single = 1, album = slideshow) ---------- */
+  function card(group) {
+    var first = group[0], n = group.length;
+    var pid = first.group || first.id;
+    var cap = '';
+    group.forEach(function (g) { if (!cap && g.caption) cap = g.caption; });
+
+    var c = el('div', 'bf-card');
+    c._pid = pid;
+    var ratio = first.w && first.h ? first.w / first.h : 16 / 9;
+    var base = 'bf-media ' + (ratio < 0.9 ? 'port' : ratio > 1.2 ? 'land' : 'sq');
+    var m = el('div', base);
+    c.appendChild(m);
+
+    var slides = [], cur = null, fxN = -1, timer = null, hold = false, vis = !io, vidPlaying = false;
+    var prog = null, cntEl = null, dots = null;
+
+    function mediaEl(it) {
+      if (it.type === 'video') {
+        var v = document.createElement('video');
+        v.controls = true; v.preload = 'none'; v.playsInline = true; v.poster = poster(it); v.src = optimized(it);
+        v.onplay = function () { vidPlaying = true; tick(); };
+        v.onpause = function () { vidPlaying = false; tick(); };
+        v.onended = function () { vidPlaying = false; if (n > 1) show(cur + 1); };
+        return v;
+      }
+      var im = document.createElement('img');
+      im.loading = 'lazy'; im.alt = cap || 'BCM'; im.src = optimized(it);
+      im.onclick = function () { openLightbox(it); };
+      return im;
+    }
+    function getSlide(i) {
+      i = (i + n) % n;
+      if (!slides[i]) { var s = el('div', 'bf-sl'); s.appendChild(mediaEl(group[i])); m.appendChild(s); slides[i] = s; }
+      return slides[i];
+    }
+    function stopProg() { if (prog) prog.classList.remove('run'); }
+    function startProg() {
+      if (!prog) return;
+      prog.classList.remove('run'); void prog.offsetWidth;
+      prog.style.animationDuration = IV + 'ms'; prog.classList.add('run');
+    }
+    function tick() {
+      clearTimeout(timer);
+      if (n < 2 || hold || !vis || vidPlaying || !c.isConnected || group[cur].type === 'video') { stopProg(); return; }
+      startProg();
+      timer = setTimeout(function () { show(cur + 1); }, IV);
+    }
+    function show(i) {
+      var ni = (i + n) % n, firstShow = cur === null;
+      var next = getSlide(ni);
+      if (!firstShow && ni !== cur) {
+        var pv = slides[cur]; pv.classList.remove('on'); pv.classList.add('out');
+        setTimeout(function () { pv.classList.remove('out'); }, 950);
+        var pvv = pv.querySelector('video'); if (pvv) pvv.pause();
+      }
+      fxN++;
+      m.className = base + ' fx' + (fxN % 4) + ' kb' + (fxN % 2);
+      next.classList.remove('out'); next.classList.add('on');
+      cur = ni;
+      if (!lite && !firstShow && n > 1) { m.classList.add('shine'); setTimeout(function () { m.classList.remove('shine'); }, 900); }
+      if (n > 1) {
+        getSlide(ni + 1);
+        cntEl.textContent = (cur + 1) + ' / ' + n;
+        [].forEach.call(dots.children, function (d, k) { d.className = k === cur ? 'on' : ''; });
+      }
+      tick();
+    }
+
+    if (!lite) {
+      var sp = el('div', 'bf-sparks');
+      [[8, 12], [86, 18], [20, 70], [72, 62], [48, 8], [92, 80], [34, 40]].forEach(function (p, k) {
+        var s = el('span', '', '✦');
+        s.style.left = p[0] + '%'; s.style.top = p[1] + '%'; s.style.fontSize = (10 + (k % 3) * 4) + 'px';
+        s.style.animationDelay = (k * 0.45) + 's'; sp.appendChild(s);
+      });
+      m.appendChild(sp);
+    }
+    if (n > 1) {
+      cntEl = el('span', 'bf-count'); m.appendChild(cntEl);
+      var pv2 = el('button', 'bf-nav prev', '‹'), nx = el('button', 'bf-nav next', '›');
+      pv2.onclick = function () { show(cur - 1); }; nx.onclick = function () { show(cur + 1); };
+      m.appendChild(pv2); m.appendChild(nx);
+      prog = el('div', 'bf-prog'); m.appendChild(prog);
+      var sx = null;
+      m.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; hold = true; clearTimeout(timer); stopProg(); }, { passive: true });
+      m.addEventListener('touchend', function (e) {
+        hold = false;
+        if (sx != null) { var dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) { show(cur + (dx < 0 ? 1 : -1)); return; } }
+        tick();
+      });
+      m.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') { hold = true; tick(); } });
+      m.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { hold = false; tick(); } });
       dots = el('div', 'bf-dots');
       group.forEach(function () { dots.appendChild(document.createElement('i')); });
     }
     show(0);
     if (dots) c.appendChild(dots);
     if (cap) c.appendChild(el('div', 'bf-cap', cap));
+    c.appendChild(actionBar(pid, c));
+
+    c._vis = function (v) { vis = v; c.classList.toggle('vis', v); tick(); };
+    if (!io) { c.classList.add('vis'); setTimeout(tick, 0); } else io.observe(c);
 
     if (admin) {
       var d = el('button', 'bf-del', '🗑 Delete');
       d.onclick = function () {
-        var what = group.length > 1 ? 'ning album (' + group.length + ' ka litrato/video)' : (first.type === 'video' ? 'ning video' : 'ning litrato');
+        var what = n > 1 ? 'ning album (' + n + ' ka litrato/video)' : (first.type === 'video' ? 'ning video' : 'ning litrato');
         if (!confirm('I-delete ' + what + '? Dili na ni mabalik.')) return;
         d.disabled = true; d.textContent = '...';
         Promise.all(group.map(function (g) { return api({ action: 'delete', password: pw, id: g.id, type: g.type }); }))
@@ -135,6 +356,16 @@
       c.appendChild(d);
     }
     return c;
+  }
+
+  function loadReactions(cards) {
+    var chunks = [];
+    for (var i = 0; i < cards.length; i += 50) chunks.push(cards.slice(i, i + 50));
+    Promise.all(chunks.map(function (ch) {
+      return rget('?ids=' + encodeURIComponent(ch.map(function (c) { return c._pid; }).join(','))).then(function (d) {
+        ch.forEach(function (c) { c._set(d.posts[c._pid] || {}); });
+      });
+    })).catch(function () { root.classList.add('noreact'); });   // wala pa ang KV -> tagoa ang like/comment
   }
 
   // Ibutang sa usa ka card ang tanang items nga parehas og group; ang walay group, single ra
@@ -249,6 +480,7 @@
   }
 
   function load() {
+    if (io) io.disconnect();
     root.textContent = '';
     root.appendChild(el('h2', '', 'LATEST POSTS & VIDEOS'));
     if (admin) root.appendChild(uploadPanel());
@@ -259,7 +491,7 @@
       .then(function (d) {
         msg.remove(); allItems = d.items || [];
         if (!d.items.length) { root.appendChild(el('div', 'bf-empty', 'Wala pay posts.')); }
-        else { buildGroups(d.items).forEach(function (g) { grid.appendChild(card(g)); }); root.appendChild(grid); }
+        else { var cards = buildGroups(d.items).map(function (g) { var cd = card(g); grid.appendChild(cd); return cd; }); root.appendChild(grid); loadReactions(cards); }
       })
       .catch(function (e) { msg.textContent = 'Dili ma-load ang posts karon. (' + e.message + ')'; });
     if (!admin) {
