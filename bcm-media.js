@@ -42,6 +42,7 @@
   var pw = '';
   try { pw = sessionStorage.getItem('bcm_admin') || ''; } catch (e) {}
   var admin = false;
+  var allItems = [];
 
   function el(tag, cls, txt) {
     var e = document.createElement(tag);
@@ -174,6 +175,32 @@
     var cap = document.createElement('textarea'); cap.rows = 2; cap.placeholder = 'Caption / posting para sa tibuok album (optional)';
     var go = el('button', 'bf-btn', 'UPLOAD');
     var out = el('button', 'bf-btn alt', 'Logout');
+    var wipe = el('button', 'bf-btn', '🗑 Delete All');
+    wipe.style.background = '#b00020'; wipe.style.color = '#fff';
+    wipe.onclick = function () {
+      if (!allItems.length) { st.textContent = 'Wala nay ma-delete.'; return; }
+      if (!confirm('I-delete ANG TANANG ' + allItems.length + ' ka litrato/video? Dili na ni mabalik.')) return;
+      var t = prompt('Para makasiguro, i-type ang DELETE:');
+      if (t !== 'DELETE') { st.textContent = 'Wala ma-delete (wala na-type ang DELETE).'; return; }
+      wipe.disabled = true; go.disabled = true; bar.style.display = 'block'; fill.style.width = '0';
+      var list = allItems.slice(), done = 0, failed = 0;
+      (function nextBatch() {
+        if (done + failed >= list.length) {
+          st.textContent = failed ? '⚠ ' + done + ' ang na-delete, ' + failed + ' ang wala. Sulayi balik.' : '✅ Na-delete na tanan.';
+          wipe.disabled = false; go.disabled = false;
+          return setTimeout(function () { bar.style.display = 'none'; load(); }, 800);
+        }
+        var batch = list.slice(done + failed, done + failed + 5);
+        Promise.all(batch.map(function (g) {
+          return api({ action: 'delete', password: pw, id: g.id, type: g.type })
+            .then(function () { done++; }, function () { failed++; });
+        })).then(function () {
+          fill.style.width = Math.round((done + failed) / list.length * 100) + '%';
+          st.textContent = 'Nag-delete... ' + (done + failed) + ' sa ' + list.length;
+          nextBatch();
+        });
+      })();
+    };
     var bar = el('div', 'bf-bar'); var fill = document.createElement('i'); bar.appendChild(fill);
     var st = el('div', 'bf-status', 'Pwede ka mopili ug daghang litrato sa usa ka higayon (hangtod 20). Usa ra ang caption ug usa ra ka post. Video hangtod 100 MB.');
     out.onclick = function () { try { sessionStorage.removeItem('bcm_admin'); } catch (e) {} pw = ''; admin = false; load(); };
@@ -217,7 +244,7 @@
           .catch(function (e) { st.textContent = '❌ ' + e.message + ' (' + k + ' sa ' + n + ' ang na-upload na)'; go.disabled = false; f.disabled = false; });
       })();
     };
-    [f, sel, cap, go, out, bar, st].forEach(function (n) { p.appendChild(n); });
+    [f, sel, cap, go, out, wipe, bar, st].forEach(function (n) { p.appendChild(n); });
     return p;
   }
 
@@ -230,7 +257,7 @@
     fetch(API + '?t=' + (admin ? Date.now() : Math.floor(Date.now() / 30000)))
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); })
       .then(function (d) {
-        msg.remove();
+        msg.remove(); allItems = d.items || [];
         if (!d.items.length) { root.appendChild(el('div', 'bf-empty', 'Wala pay posts.')); }
         else { buildGroups(d.items).forEach(function (g) { grid.appendChild(card(g)); }); root.appendChild(grid); }
       })
