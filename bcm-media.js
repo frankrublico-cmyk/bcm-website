@@ -85,6 +85,27 @@
 .bf-cm input[type=text],.bf-cm textarea{width:100%;box-sizing:border-box;padding:8px;border-radius:8px;border:1px solid #475569;background:#0d111a;color:#fff;font-size:14px;margin:4px 0;font-family:inherit}
 .bf-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 `;
+  css.textContent += `
+.fx4 .bf-sl.on{animation-name:bfIn4}
+.fx5 .bf-sl.on{animation-name:bfIn5}
+.fx6 .bf-sl.on{animation-name:bfIn6}
+.fx7 .bf-sl.on{animation-name:bfIn7}
+@keyframes bfIn4{from{opacity:1;clip-path:circle(0% at 50% 50%)}to{opacity:1;clip-path:circle(80% at 50% 50%)}}
+@keyframes bfIn5{from{opacity:1;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes bfIn6{from{opacity:0;transform:perspective(900px) rotateY(55deg) scale(.88)}to{opacity:1;transform:none}}
+@keyframes bfIn7{from{opacity:0;transform:scale(.6) rotate(8deg);filter:brightness(2.4) saturate(1.6)}to{opacity:1;transform:none;filter:none}}
+.bf-media::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+.bf-grain{position:absolute;inset:-50%;z-index:3;pointer-events:none;opacity:.09;mix-blend-mode:overlay;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");animation:bfGrain .6s steps(4) infinite}
+@keyframes bfGrain{0%{transform:translate(0,0)}25%{transform:translate(-6%,4%)}50%{transform:translate(5%,-5%)}75%{transform:translate(-4%,-3%)}100%{transform:translate(0,0)}}
+.bf-leak{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;mix-blend-mode:screen;background:radial-gradient(circle at 15% 25%,rgba(255,150,40,.75),transparent 50%),radial-gradient(circle at 90% 80%,rgba(255,60,120,.55),transparent 45%)}
+.bf-media.shine .bf-leak{animation:bfLeak 1.1s ease-out}
+@keyframes bfLeak{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+.bf-pz{position:absolute;right:10px;bottom:12px;z-index:5;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:50%;width:34px;height:34px;font-size:14px;cursor:pointer}
+.bf-sl{will-change:transform,opacity}
+.eco .bf-grain,.eco .bf-leak,.eco .bf-sparks,.eco .bf-media::after{display:none}
+.eco .bf-media::before{display:none}
+.lite .bf-grain,.lite .bf-leak,.lite .bf-media::before{display:none}
+`;
   document.head.appendChild(css);
 
   var pw = '';
@@ -118,6 +139,8 @@
   try { lite = localStorage.getItem('bcm_fx') === 'off'; } catch (e) {}
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) lite = true;
   if (lite) root.classList.add('lite');
+  var eco = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+  if (eco && !lite) root.classList.add('eco');
 
   var io = 'IntersectionObserver' in window
     ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.target._vis) e.target._vis(e.isIntersecting); }); }, { threshold: 0.35 })
@@ -253,7 +276,7 @@
     var m = el('div', base);
     c.appendChild(m);
 
-    var slides = [], cur = null, fxN = -1, timer = null, hold = false, vis = !io, vidPlaying = false;
+    var slides = [], cur = null, fxN = -1, timer = null, hold = false, paused = false, vis = !io, vidPlaying = false;
     var prog = null, cntEl = null, dots = null;
 
     function mediaEl(it) {
@@ -283,7 +306,7 @@
     }
     function tick() {
       clearTimeout(timer);
-      if (n < 2 || hold || !vis || vidPlaying || !c.isConnected || group[cur].type === 'video') { stopProg(); return; }
+      if (n < 2 || hold || paused || !vis || vidPlaying || !c.isConnected || group[cur].type === 'video') { stopProg(); return; }
       startProg();
       timer = setTimeout(function () { show(cur + 1); }, IV);
     }
@@ -296,7 +319,7 @@
         var pvv = pv.querySelector('video'); if (pvv) pvv.pause();
       }
       fxN++;
-      m.className = base + ' fx' + (fxN % 4) + ' kb' + (fxN % 2);
+      m.className = base + ' fx' + (fxN % 8) + ' kb' + (fxN % 2);
       next.classList.remove('out'); next.classList.add('on');
       cur = ni;
       if (!lite && !firstShow && n > 1) { m.classList.add('shine'); setTimeout(function () { m.classList.remove('shine'); }, 900); }
@@ -316,12 +339,16 @@
         s.style.animationDelay = (k * 0.45) + 's'; sp.appendChild(s);
       });
       m.appendChild(sp);
+      if (n > 1) { m.appendChild(el('div', 'bf-grain')); m.appendChild(el('div', 'bf-leak')); }
     }
     if (n > 1) {
       cntEl = el('span', 'bf-count'); m.appendChild(cntEl);
       var pv2 = el('button', 'bf-nav prev', '‹'), nx = el('button', 'bf-nav next', '›');
       pv2.onclick = function () { show(cur - 1); }; nx.onclick = function () { show(cur + 1); };
       m.appendChild(pv2); m.appendChild(nx);
+      var pz = el('button', 'bf-pz', '⏸');
+      pz.onclick = function () { paused = !paused; pz.textContent = paused ? '▶' : '⏸'; tick(); };
+      m.appendChild(pz);
       prog = el('div', 'bf-prog'); m.appendChild(prog);
       var sx = null;
       m.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; hold = true; clearTimeout(timer); stopProg(); }, { passive: true });
@@ -433,7 +460,7 @@
       })();
     };
     var bar = el('div', 'bf-bar'); var fill = document.createElement('i'); bar.appendChild(fill);
-    var st = el('div', 'bf-status', 'Pwede ka mopili ug daghang litrato sa usa ka higayon (hangtod 20). Usa ra ang caption ug usa ra ka post. Video hangtod 100 MB.');
+    var st = el('div', 'bf-status', 'Pwede ka mopili ug daghang litrato sa usa ka higayon (hangtod 50). Usa ra ang caption ug usa ra ka post. Video hangtod 100 MB.');
     out.onclick = function () { try { sessionStorage.removeItem('bcm_admin'); } catch (e) {} pw = ''; admin = false; load(); };
 
     function uploadOne(file, gid, idx, onPct) {
@@ -456,7 +483,7 @@
     go.onclick = function () {
       var files = [].slice.call(f.files || []);
       if (!files.length) { st.textContent = 'Pili una ug file.'; return; }
-      if (files.length > 20) { st.textContent = 'Sobra sa 20 ka file. Bahina sa duha ka post.'; return; }
+      if (files.length > 50) { st.textContent = 'Sobra sa 50 ka file. Bahina sa duha ka post.'; return; }
       for (var i = 0; i < files.length; i++) {
         if (/^video\//.test(files[i].type) && files[i].size > 100 * 1024 * 1024) { st.textContent = '"' + files[i].name + '" sobra sa 100 MB. I-compress una.'; return; }
       }

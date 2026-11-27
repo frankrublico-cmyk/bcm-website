@@ -23,7 +23,7 @@ async function sha1hex(str) {
 const basic = env => 'Basic ' + btoa(env.CLOUDINARY_API_KEY + ':' + env.CLOUDINARY_API_SECRET);
 
 async function listType(env, type) {
-  const url = `https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/resources/${type}/tags/${TAG}?max_results=100&context=true`;
+  const url = `https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/resources/${type}/tags/${TAG}?max_results=500&context=true`;
   const r = await fetch(url, { headers: { Authorization: basic(env) } });
   if (!r.ok) throw new Error('Cloudinary list error ' + r.status);
   const j = await r.json();
@@ -34,6 +34,8 @@ async function listType(env, type) {
     w: x.width,
     h: x.height,
     caption: (x.context && x.context.custom && x.context.custom.caption) || '',
+    group: (x.context && x.context.custom && x.context.custom.group) || '',
+    idx: Number((x.context && x.context.custom && x.context.custom.idx) || 0),
     created: x.created_at,
   }));
 }
@@ -70,8 +72,14 @@ export async function onRequestPost({ request, env }) {
 
   if (b.action === 'sign') {
     const caption = String(b.caption || '').slice(0, 500).replace(/[|=]/g, m => '\\' + m);
+    // Album: ang tanang litrato sa usa ka post parehas og group id; idx = han-ay sa slider
+    const group = /^[a-z0-9]{6,24}$/.test(String(b.group || '')) ? String(b.group) : '';
+    const idx = Number.isInteger(b.idx) && b.idx >= 0 && b.idx < 100 ? b.idx : 0;
+    const ctx = [];
+    if (caption) ctx.push('caption=' + caption);
+    if (group) ctx.push('group=' + group, 'idx=' + idx);
     const params = {
-      context: caption ? 'caption=' + caption : '',
+      context: ctx.join('|'),
       folder: FOLDER,
       tags: TAG,
       timestamp: String(Math.floor(Date.now() / 1000)),
