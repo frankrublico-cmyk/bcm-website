@@ -27,6 +27,13 @@
     '.bf-bar{height:12px;background:#1e293b;border-radius:8px;overflow:hidden;margin-top:10px;display:none}',
     '.bf-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#00d2ff,#39ff14);transition:width .2s}',
     '.bf-status{margin-top:8px;font-size:14px;color:#cbd5e1}',
+    '.bf-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:50%;width:38px;height:38px;font-size:22px;line-height:1;cursor:pointer}',
+    '.bf-nav.prev{left:8px}.bf-nav.next{right:8px}',
+    '.bf-count{position:absolute;top:8px;left:8px;z-index:2;background:rgba(0,0,0,.6);color:#fff;border-radius:12px;padding:3px 10px;font-size:12px;font-weight:700}',
+    '.bf-dots{display:flex;justify-content:center;gap:6px;padding:8px 0 0}',
+    '.bf-dots i{width:7px;height:7px;border-radius:50%;background:#475569;display:block}',
+    '.bf-dots i.on{background:#d4af37}',
+    '.bf-sel{margin:6px 0;font-size:13px;color:#cbd5e1}',
     '.bf-lb{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:5000;display:flex;align-items:center;justify-content:center;cursor:zoom-out}',
     '.bf-lb img{max-width:96vw;max-height:94vh;object-fit:contain}'
   ].join('');
@@ -57,38 +64,89 @@
     return it.url.replace('/upload/', '/upload/so_0,w_800,q_auto/').replace(/\.[a-z0-9]+$/i, '.jpg');
   }
 
-  function card(it) {
-    var c = el('div', 'bf-card');
-    var ratio = it.w && it.h ? it.w / it.h : 16 / 9;
-    var m = el('div', 'bf-media ' + (ratio < 0.9 ? 'port' : ratio > 1.2 ? 'land' : 'sq'));
+  function openLightbox(it) {
+    var lb = el('div', 'bf-lb'); var big = document.createElement('img');
+    big.src = it.url.replace('/upload/', '/upload/f_auto,q_auto,w_2000/'); lb.appendChild(big);
+    lb.onclick = function () { lb.remove(); }; document.body.appendChild(lb);
+  }
+
+  function slide(it, cap) {
     if (it.type === 'video') {
       var v = document.createElement('video');
       v.controls = true; v.preload = 'none'; v.playsInline = true; v.poster = poster(it); v.src = optimized(it);
-      m.appendChild(v);
-    } else {
-      var im = document.createElement('img');
-      im.loading = 'lazy'; im.alt = it.caption || 'BCM'; im.src = optimized(it);
-      im.onclick = function () {
-        var lb = el('div', 'bf-lb'); var big = document.createElement('img');
-        big.src = it.url.replace('/upload/', '/upload/f_auto,q_auto,w_2000/'); lb.appendChild(big);
-        lb.onclick = function () { lb.remove(); }; document.body.appendChild(lb);
-      };
-      m.appendChild(im);
+      return v;
     }
+    var im = document.createElement('img');
+    im.loading = 'lazy'; im.alt = cap || 'BCM'; im.src = optimized(it);
+    im.onclick = function () { openLightbox(it); };
+    return im;
+  }
+
+  // group = array of items (1 = single post, 2+ = album with slider)
+  function card(group) {
+    var first = group[0];
+    var cap = '';
+    group.forEach(function (g) { if (!cap && g.caption) cap = g.caption; });
+    var c = el('div', 'bf-card');
+    var ratio = first.w && first.h ? first.w / first.h : 16 / 9;
+    var m = el('div', 'bf-media ' + (ratio < 0.9 ? 'port' : ratio > 1.2 ? 'land' : 'sq'));
     c.appendChild(m);
-    if (it.caption) c.appendChild(el('div', 'bf-cap', it.caption));
+    var cur = 0, dots = null;
+
+    function show(i) {
+      cur = (i + group.length) % group.length;
+      var old = m.querySelector('img,video'); if (old) old.remove();
+      m.insertBefore(slide(group[cur], cap), m.firstChild);
+      if (group.length > 1) {
+        m.querySelector('.bf-count').textContent = (cur + 1) + ' / ' + group.length;
+        [].forEach.call(dots.children, function (d, k) { d.className = k === cur ? 'on' : ''; });
+      }
+    }
+
+    if (group.length > 1) {
+      var cnt = el('span', 'bf-count'); m.appendChild(cnt);
+      var pv = el('button', 'bf-nav prev', '‹'), nx = el('button', 'bf-nav next', '›');
+      pv.onclick = function () { show(cur - 1); }; nx.onclick = function () { show(cur + 1); };
+      m.appendChild(pv); m.appendChild(nx);
+      var sx = null;
+      m.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+      m.addEventListener('touchend', function (e) {
+        if (sx == null) return; var dx = e.changedTouches[0].clientX - sx; sx = null;
+        if (Math.abs(dx) > 40) show(cur + (dx < 0 ? 1 : -1));
+      });
+      dots = el('div', 'bf-dots');
+      group.forEach(function () { dots.appendChild(document.createElement('i')); });
+    }
+    show(0);
+    if (dots) c.appendChild(dots);
+    if (cap) c.appendChild(el('div', 'bf-cap', cap));
+
     if (admin) {
       var d = el('button', 'bf-del', '🗑 Delete');
       d.onclick = function () {
-        if (!confirm('I-delete ning ' + (it.type === 'video' ? 'video' : 'litrato') + '? Dili na ni mabalik.')) return;
+        var what = group.length > 1 ? 'ning album (' + group.length + ' ka litrato/video)' : (first.type === 'video' ? 'ning video' : 'ning litrato');
+        if (!confirm('I-delete ' + what + '? Dili na ni mabalik.')) return;
         d.disabled = true; d.textContent = '...';
-        api({ action: 'delete', password: pw, id: it.id, type: it.type })
+        Promise.all(group.map(function (g) { return api({ action: 'delete', password: pw, id: g.id, type: g.type }); }))
           .then(function () { c.remove(); })
           .catch(function (e) { alert('Wala ma-delete: ' + e.message); d.disabled = false; d.textContent = '🗑 Delete'; });
       };
       c.appendChild(d);
     }
     return c;
+  }
+
+  // Ibutang sa usa ka card ang tanang items nga parehas og group; ang walay group, single ra
+  function buildGroups(items) {
+    var seen = {}, out = [];
+    items.forEach(function (it) {
+      if (!it.group) { out.push([it]); return; }
+      if (seen[it.group]) return;
+      var g = items.filter(function (x) { return x.group === it.group; })
+        .sort(function (a, b) { return (a.idx || 0) - (b.idx || 0); });
+      seen[it.group] = 1; out.push(g);
+    });
+    return out;
   }
 
   function shrinkImage(file) {
@@ -109,21 +167,19 @@
 
   function uploadPanel() {
     var p = el('div', 'bf-panel');
-    p.appendChild(el('h3', '', '⬆ UPLOAD PHOTO / VIDEO'));
-    var f = document.createElement('input'); f.type = 'file'; f.accept = 'image/*,video/*';
-    var cap = document.createElement('textarea'); cap.rows = 2; cap.placeholder = 'Caption / posting (optional)';
+    p.appendChild(el('h3', '', '⬆ UPLOAD PHOTOS / VIDEO'));
+    var f = document.createElement('input'); f.type = 'file'; f.accept = 'image/*,video/*'; f.multiple = true;
+    var sel = el('div', 'bf-sel', '');
+    f.onchange = function () { sel.textContent = f.files.length ? f.files.length + ' ka file ang napili (usa ka album)' : ''; };
+    var cap = document.createElement('textarea'); cap.rows = 2; cap.placeholder = 'Caption / posting para sa tibuok album (optional)';
     var go = el('button', 'bf-btn', 'UPLOAD');
     var out = el('button', 'bf-btn alt', 'Logout');
     var bar = el('div', 'bf-bar'); var fill = document.createElement('i'); bar.appendChild(fill);
-    var st = el('div', 'bf-status', 'Widescreen (16:9) ug portrait (4:5) maayo. Video hangtod 100 MB.');
+    var st = el('div', 'bf-status', 'Pwede ka mopili ug daghang litrato sa usa ka higayon (hangtod 20). Usa ra ang caption ug usa ra ka post. Video hangtod 100 MB.');
     out.onclick = function () { try { sessionStorage.removeItem('bcm_admin'); } catch (e) {} pw = ''; admin = false; load(); };
-    go.onclick = function () {
-      var file = f.files && f.files[0];
-      if (!file) { st.textContent = 'Pili una ug file.'; return; }
-      var isVid = /^video\//.test(file.type);
-      if (isVid && file.size > 100 * 1024 * 1024) { st.textContent = 'Sobra sa 100 MB ang video. I-compress una.'; return; }
-      go.disabled = true; st.textContent = 'Gihana-hana...'; bar.style.display = 'block'; fill.style.width = '0';
-      Promise.all([shrinkImage(file), api({ action: 'sign', password: pw, caption: cap.value })]).then(function (r) {
+
+    function uploadOne(file, gid, idx, onPct) {
+      return Promise.all([shrinkImage(file), api({ action: 'sign', password: pw, caption: cap.value, group: gid, idx: idx })]).then(function (r) {
         var blob = r[0], s = r[1];
         var fd = new FormData();
         fd.append('file', blob, file.name);
@@ -131,19 +187,37 @@
         return new Promise(function (res, rej) {
           var x = new XMLHttpRequest();
           x.open('POST', 'https://api.cloudinary.com/v1_1/' + s.cloud_name + '/auto/upload');
-          x.upload.onprogress = function (e) {
-            if (e.lengthComputable) { var pc = Math.round(e.loaded / e.total * 100); fill.style.width = pc + '%'; st.textContent = 'Nag-upload... ' + pc + '%'; }
-          };
+          x.upload.onprogress = function (e) { if (e.lengthComputable) onPct(e.loaded / e.total); };
           x.onload = function () { x.status < 300 ? res() : rej(new Error('Upload failed (' + x.status + ') ' + x.responseText.slice(0, 120))); };
           x.onerror = function () { rej(new Error('Walay koneksyon')); };
           x.send(fd);
         });
-      }).then(function () {
-        st.textContent = '✅ Na-upload na!'; f.value = ''; cap.value = ''; go.disabled = false;
-        setTimeout(function () { bar.style.display = 'none'; load(); }, 800);
-      }).catch(function (e) { st.textContent = '❌ ' + e.message; go.disabled = false; });
+      });
+    }
+
+    go.onclick = function () {
+      var files = [].slice.call(f.files || []);
+      if (!files.length) { st.textContent = 'Pili una ug file.'; return; }
+      if (files.length > 20) { st.textContent = 'Sobra sa 20 ka file. Bahina sa duha ka post.'; return; }
+      for (var i = 0; i < files.length; i++) {
+        if (/^video\//.test(files[i].type) && files[i].size > 100 * 1024 * 1024) { st.textContent = '"' + files[i].name + '" sobra sa 100 MB. I-compress una.'; return; }
+      }
+      var gid = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      go.disabled = true; f.disabled = true; bar.style.display = 'block'; fill.style.width = '0';
+      var n = files.length, k = 0;
+      (function next() {
+        if (k >= n) {
+          st.textContent = '✅ Na-upload na ang ' + n + ' ka file!'; f.value = ''; sel.textContent = ''; cap.value = ''; go.disabled = false; f.disabled = false;
+          return setTimeout(function () { bar.style.display = 'none'; load(); }, 800);
+        }
+        uploadOne(files[k], gid, k, function (frac) {
+          var pc = Math.round((k + frac) / n * 100); fill.style.width = pc + '%';
+          st.textContent = 'Nag-upload ' + (k + 1) + ' sa ' + n + '... ' + pc + '%';
+        }).then(function () { k++; next(); })
+          .catch(function (e) { st.textContent = '❌ ' + e.message + ' (' + k + ' sa ' + n + ' ang na-upload na)'; go.disabled = false; f.disabled = false; });
+      })();
     };
-    [f, cap, go, out, bar, st].forEach(function (n) { p.appendChild(n); });
+    [f, sel, cap, go, out, bar, st].forEach(function (n) { p.appendChild(n); });
     return p;
   }
 
@@ -158,7 +232,7 @@
       .then(function (d) {
         msg.remove();
         if (!d.items.length) { root.appendChild(el('div', 'bf-empty', 'Wala pay posts.')); }
-        else { d.items.forEach(function (it) { grid.appendChild(card(it)); }); root.appendChild(grid); }
+        else { buildGroups(d.items).forEach(function (g) { grid.appendChild(card(g)); }); root.appendChild(grid); }
       })
       .catch(function (e) { msg.textContent = 'Dili ma-load ang posts karon. (' + e.message + ')'; });
     if (!admin) {
