@@ -37,9 +37,9 @@ async function listType(env, type) {
     url: x.secure_url,
     w: x.width,
     h: x.height,
-    caption: decCap((x.context && x.context.custom && x.context.custom.caption) || ''),
+    caption: decCap((x.context && x.context.custom && x.context.custom.caption) || '').trim(),
     group: (x.context && x.context.custom && x.context.custom.group) || '',
-    more: !!(x.context && x.context.custom && x.context.custom.more),
+    more: (x.context && x.context.custom && x.context.custom.more) === '1',
     idx: Number((x.context && x.context.custom && x.context.custom.idx) || 0),
     created: x.created_at,
   }));
@@ -113,6 +113,32 @@ export async function onRequestPost({ request, env }) {
       context: params.context || '',
       timestamp: params.timestamp,
     });
+  }
+
+  if (b.action === 'edit') {
+    // Admin lang: usbon ang caption sa usa ka post (tanang items sa group)
+    const items = Array.isArray(b.items) ? b.items.slice(0, 60) : [];
+    const group = /^[a-z0-9]{6,24}$/.test(String(b.group || '')) ? String(b.group) : '';
+    const rawCap = String(b.caption || '').replace(/\r/g, '').trim().slice(0, 5000);
+    const long = rawCap.length > STUB && group && env.CHAT;
+    const stub = encodeURIComponent(rawCap.replace(/\s+/g, ' ').slice(0, STUB)) || '%20';
+    if (group && env.CHAT) { if (long) await env.CHAT.put('cap:' + group, rawCap); else await env.CHAT.delete('cap:' + group); }
+    for (const type of ['image', 'video']) {
+      const ids = items.filter(i => i && i.type === type && typeof i.id === 'string').map(i => i.id);
+      if (!ids.length) continue;
+      const form = new URLSearchParams();
+      form.set('command', 'add');
+      form.set('context', 'caption=' + stub + '|more=' + (long ? '1' : '0'));
+      ids.forEach(id => form.append('public_ids[]', id));
+      const r = await fetch(`https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/${type}/context`, {
+        method: 'POST',
+        headers: { Authorization: basic(env), 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: form,
+      });
+      if (!r.ok) return json({ error: 'Cloudinary edit error ' + r.status }, 502);
+    }
+    await caches.default.delete(new Request('https://bcm.cache/media-list'));
+    return json({ ok: true });
   }
 
   if (b.action === 'delete') {

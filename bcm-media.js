@@ -14,6 +14,12 @@
     '.bf-media img,.bf-media video{width:100%;height:100%;object-fit:contain;display:block;cursor:zoom-in}',
     '.bf-media video{cursor:auto}',
     '.bf-cap{padding:12px 14px;color:#e2e8f0;font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word}',
+    '.bf-edit{right:112px!important;background:#1d4ed8!important}',
+    '.bf-ov{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:14px}',
+    '.bf-ov>div{background:#0d111a;border:1px solid #475569;border-radius:12px;padding:16px;width:100%;max-width:560px}',
+    '.bf-ov textarea{width:100%;box-sizing:border-box;min-height:240px;padding:10px;border-radius:8px;border:1px solid #475569;background:#05070c;color:#fff;font:inherit;font-size:15px}',
+    '.bf-ov .r{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}',
+    '.bf-ov button{border:0;border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer}',
     '.bf-del{position:absolute;top:8px;right:8px;z-index:3;background:#b00020;color:#fff;border:0;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:0 0 10px rgba(0,0,0,.6)}',
     '.bf-empty,.bf-msg{color:#a0aec0;text-align:center;padding:24px}',
     '.bf-admin-link{display:block;margin:26px auto 0;background:none;border:1px solid rgba(255,255,255,.2);color:#a0aec0;border-radius:20px;padding:6px 16px;cursor:pointer;font-size:13px}',
@@ -414,6 +420,23 @@
           .catch(function (e) { alert('Wala ma-delete: ' + e.message); d.disabled = false; d.textContent = '🗑 Delete'; });
       };
       c.appendChild(d);
+      var ed = el('button', 'bf-del bf-edit', '✏️ Edit');
+      ed.onclick = function () {
+        var ov = el('div', 'bf-ov'), bx = el('div'), ta = el('textarea'), row = el('div', 'r');
+        ta.value = c._cap || ''; ta.maxLength = 5000;
+        var cb = el('button', '', 'Cancel'), sb = el('button', '', 'Save');
+        sb.style.cssText = 'background:#d4af37;color:#111'; cb.style.cssText = 'background:#334155;color:#fff';
+        cb.onclick = function () { ov.remove(); };
+        sb.onclick = function () {
+          sb.disabled = true; sb.textContent = '...';
+          api({ action: 'edit', password: pw, group: first.group || '', caption: ta.value, items: group.map(function (g) { return { id: g.id, type: g.type }; }) })
+            .then(function () { ov.remove(); load(); })
+            .catch(function (e) { alert('Wala ma-save: ' + e.message); sb.disabled = false; sb.textContent = 'Save'; });
+        };
+        row.appendChild(cb); row.appendChild(sb); bx.appendChild(el('div', '', 'Usba ang caption (**bold**, *italic* pwede)')); bx.appendChild(ta); bx.appendChild(row); ov.appendChild(bx);
+        document.body.appendChild(ov); ta.focus();
+      };
+      c.appendChild(ed);
     }
     return c;
   }
