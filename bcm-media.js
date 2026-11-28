@@ -86,6 +86,7 @@
 .bf-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 `;
   css.textContent += `
+.bf-more{background:none;border:0;color:#60a5fa;font:inherit;font-weight:700;cursor:pointer;padding:0}
 .fx4 .bf-sl.on{animation-name:bfIn4}
 .fx5 .bf-sl.on{animation-name:bfIn5}
 .fx6 .bf-sl.on{animation-name:bfIn6}
@@ -112,6 +113,17 @@
   try { pw = sessionStorage.getItem('bcm_admin') || ''; } catch (e) {}
   var admin = false;
   var allItems = [];
+
+  // **bold** ug *italic* (luwas, walay innerHTML)
+  function rich(p, t) {
+    var re = /\*\*([^*]+?)\*\*|\*([^*\n]+?)\*/g, i = 0, m;
+    while ((m = re.exec(t))) {
+      if (m.index > i) p.appendChild(document.createTextNode(t.slice(i, m.index)));
+      p.appendChild(el(m[1] != null ? 'strong' : 'em', '', m[1] != null ? m[1] : m[2]));
+      i = re.lastIndex;
+    }
+    if (i < t.length) p.appendChild(document.createTextNode(t.slice(i)));
+  }
 
   function el(tag, cls, txt) {
     var e = document.createElement(tag);
@@ -260,7 +272,7 @@
     var sh = el('button', 'bf-pill'); sh.appendChild(el('span', '', '↗')); sh.appendChild(el('b', '', 'Share')); bar.appendChild(sh);
     sh.onclick = function () {
       var url = location.origin + location.pathname + '#post-' + pid;
-      var ce = card.querySelector('.bf-cap'), txt = ce ? ce.textContent.slice(0, 200) : 'Breaking Chain Ministry';
+      var txt = (card._cap || 'Breaking Chain Ministry').replace(/\*+/g, '').slice(0, 200);
       if (navigator.share) { navigator.share({ title: 'Breaking Chain Ministry', text: txt, url: url }).catch(function () {}); return; }
       window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), 'fbshare', 'width=620,height=520');
     };
@@ -371,7 +383,21 @@
     }
     show(0);
     if (dots) c.appendChild(dots);
-    if (cap) c.appendChild(el('div', 'bf-cap', cap));
+    c._cap = cap;
+    if (cap) {
+      var cp = el('div', 'bf-cap'), LIM = 220, long = cap.length > LIM || cap.split('\n').length > 4, cut = cap;
+      if (long) {
+        cut = cap.slice(0, LIM); var sp2 = cut.lastIndexOf(' '); if (sp2 > 120) cut = cut.slice(0, sp2);
+        if ((cut.match(/\*/g) || []).length % 2) cut = cut.slice(0, cut.lastIndexOf('*'));
+      }
+      var open2 = false, mb = long ? el('button', 'bf-more', 'See more') : null;
+      var fill = function () {
+        cp.textContent = ''; rich(cp, open2 || !long ? cap : cut + '… ');
+        if (mb) { mb.textContent = open2 ? 'See less' : 'See more'; cp.appendChild(document.createTextNode(' ')); cp.appendChild(mb); }
+      };
+      if (mb) mb.onclick = function () { open2 = !open2; fill(); };
+      fill(); c.appendChild(cp);
+    }
     c.appendChild(actionBar(pid, c));
 
     c._vis = function (v) { vis = v; c.classList.toggle('vis', v); tick(); };
@@ -467,7 +493,7 @@
       })();
     };
     var bar = el('div', 'bf-bar'); var fill = document.createElement('i'); bar.appendChild(fill);
-    var st = el('div', 'bf-status', 'Pwede ka mopili ug daghang litrato sa usa ka higayon (hangtod 50). Usa ra ang caption ug usa ra ka post. Video hangtod 100 MB.');
+    var st = el('div', 'bf-status', 'Pwede ka mopili ug daghang litrato sa usa ka higayon (hangtod 50). Taas nga caption pwede (hangtod 5000 ka letra, naay "See more"). Usa ra ang caption ug usa ra ka post. Video hangtod 100 MB.');
     out.onclick = function () { try { sessionStorage.removeItem('bcm_admin'); } catch (e) {} pw = ''; admin = false; load(); };
 
     function uploadOne(file, gid, idx, onPct) {
