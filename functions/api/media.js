@@ -24,6 +24,8 @@ const basic = env => 'Basic ' + btoa(env.CLOUDINARY_API_KEY + ':' + env.CLOUDINA
 
 function decCap(c) { try { return decodeURIComponent(c); } catch (e) { return c; } }
 
+const STUB = 250;   // unsa ka taas ang caption nga diretso sa Cloudinary; ang taas nga bahin naa sa KV
+
 async function listType(env, type) {
   const url = `https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/resources/${type}/tags/${TAG}?max_results=500&context=true`;
   const r = await fetch(url, { headers: { Authorization: basic(env) } });
@@ -37,6 +39,7 @@ async function listType(env, type) {
     h: x.height,
     caption: decCap((x.context && x.context.custom && x.context.custom.caption) || ''),
     group: (x.context && x.context.custom && x.context.custom.group) || '',
+    more: !!(x.context && x.context.custom && x.context.custom.more),
     idx: Number((x.context && x.context.custom && x.context.custom.idx) || 0),
     created: x.created_at,
   }));
@@ -57,6 +60,13 @@ export async function onRequestGet({ request, env }) {
   try {
     const [imgs, vids] = await Promise.all([listType(env, 'image'), listType(env, 'video')]);
     const items = imgs.concat(vids).sort((a, b) => (a.created < b.created ? 1 : -1));
+    // Taas nga caption: kuhaon ang bug-os gikan sa KV (usa ra matag group)
+    if (env.CHAT) {
+      const gs = [...new Set(items.filter(i => i.more && i.group).map(i => i.group))];
+      const full = {};
+      await Promise.all(gs.map(async g => { try { const v = await env.CHAT.get('cap:' + g); if (v) full[g] = v; } catch (e) {} }));
+      items.forEach(i => { if (i.more && full[i.group]) i.caption = full[i.group]; delete i.more; });
+    } else items.forEach(i => { delete i.more; });
     const res = json({ items }, 200, { 'Cache-Control': 'public, max-age=30' });
     if (!fresh) await cache.put(key, res.clone());
     return res;
@@ -74,12 +84,16 @@ export async function onRequestPost({ request, env }) {
 
   if (b.action === 'sign') {
     // Caption gi-encode (safe sa Cloudinary context); gi-decode balik sa listType
-    const caption = encodeURIComponent(String(b.caption || '').replace(/\s+/g, ' ').trim().slice(0, 300));
+    const rawCap = String(b.caption || '').replace(/\r/g, '').trim().slice(0, 5000);
     // Album: ang tanang litrato sa usa ka post parehas og group id; idx = han-ay sa slider
     const group = /^[a-z0-9]{6,24}$/.test(String(b.group || '')) ? String(b.group) : '';
     const idx = Number.isInteger(b.idx) && b.idx >= 0 && b.idx < 100 ? b.idx : 0;
     const ctx = [];
+    const long = rawCap.length > STUB && group && env.CHAT;
+    const caption = encodeURIComponent((long ? rawCap : rawCap.slice(0, STUB)).replace(/\s+/g, ' ').slice(0, STUB));
+    if (long && idx === 0) await env.CHAT.put('cap:' + group, rawCap);
     if (caption) ctx.push('caption=' + caption);
+    if (long) ctx.push('more=1');
     if (group) ctx.push('group=' + group, 'idx=' + idx);
     const params = {
       context: ctx.join('|'),
